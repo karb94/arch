@@ -6,7 +6,7 @@ device=$1
 timedatectl set-ntp true
 
 # Partition the disk
-sfdisk -W always < ptab
+sfdisk -W always /dev/${device} < ptab
 
 # Creating file systems
 mkfs.ext4 /dev/${device}1
