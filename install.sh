@@ -64,10 +64,19 @@ sed -i '/en_GB.UTF-8/s/#//' /etc/locale.gen
 #sed -i '/es_ES.UTF-8/s/#//' /etc/locale.gen
 #sed -i '/ca_ES.UTF-8/s/#//' /etc/locale.gen
 locale-gen
-echo "LANG=$(sed '/en_GB.UTF-8/s/#//' /etc/locale.gen)" > /etc/locale.conf
+echo "LANG=$(grep en_GB.UTF-8 /etc/locale.gen)" > /etc/locale.conf
+
+echo "Arch_VV" > /etc/hostname
+
+cat <<EOT > /etc/hosts
+127.0.0.1   localhost
+::1         localhost
+127.0.1.1   Arch_VV.localdomain Arch_VV
+EOT
 
 exit
 EOF
+chmod u+x /mnt/chroot.sh
 
 # Change root to /mnt
 echo "Changing root to /mnt"
