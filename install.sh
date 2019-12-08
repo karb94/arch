@@ -22,21 +22,21 @@ name=home, type=933AC7E1-2EB4-4F13-B844-0E14E2AEF915
 EOF
 
 # Creating file systems
-mkfs.ext4 /dev/${device}1 > install.log
-mkswap /dev/${device}2 > install.log
-swapon /dev/${device}2 > install.log
-mkfs.ext4 /dev/${device}3 > install.log
-mkfs.ext4 /dev/${device}4 > install.log
+mkfs.ext4 /dev/${device}1 > install.log 2>&1
+mkswap /dev/${device}2 > install.log 2>&1
+swapon /dev/${device}2 > install.log 2>&1
+mkfs.ext4 /dev/${device}3 > install.log 2>&1
+mkfs.ext4 /dev/${device}4 > install.log 2>&1
 
 
 # Mounting root file system
-mount /dev/${device}1 /mnt > install.log
+mount /dev/${device}1 /mnt > install.log 2>&1
 # Creating mounting points on /mnt
-mkdir /mnt/boot > install.log
-mkdir /mnt/home > install.log
+mkdir /mnt/boot > install.log 2>&1
+mkdir /mnt/home > install.log 2>&1
 # Mounting boot and home file systems
-mount /dev/${device}3 /mnt/boot > install.logot
-mount /dev/${device}4 /mnt/home > install.log
+mount /dev/${device}3 /mnt/boot > install.log 2>&1
+mount /dev/${device}4 /mnt/home > install.log 2>&1
 
 # Create minimal syste in /mnt by bootstrapping
 pacstrap /mnt base linux-zen linux-firmware
