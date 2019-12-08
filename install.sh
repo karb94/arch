@@ -15,6 +15,10 @@ swapon /dev/${device}2
 mkfs.ext4 /dev/${device}3
 mkfs.ext4 /dev/${device}4
 
+# Creating mounting points
+mkdir /mnt/boot
+mkdir /mnt/home
+
 # Mounting file systems
 mount /dev/${device}1 /mnt
 mount /dev/${device}3 /mnt/boot
