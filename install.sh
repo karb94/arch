@@ -28,7 +28,8 @@ echo "Creating file systems"
 mkfs.ext4 -L "root" /dev/${device}1 >> install.log 2>&1
 mkswap -L "swap" /dev/${device}2 >> install.log 2>&1
 swapon /dev/${device}2 >> install.log 2>&1
-mkfs.ext4 -L "boot" /dev/${device}3 >> install.log 2>&1
+# With gpt boot partition must not have a file system
+# mkfs.ext4 -L "boot" /dev/${device}3 >> install.log 2>&1
 mkfs.ext4 -L "home" /dev/${device}4 >> install.log 2>&1
 
 
