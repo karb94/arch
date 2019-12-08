@@ -13,7 +13,7 @@ device=$1
 timedatectl set-ntp true
 
 # Partition the disk
-sfdisk -W always /dev/${device} << EOF
+sfdisk -W always /dev/${device} << EOF > install.log
 label: gpt
 name=root, size=15GiB, type=4F68BCE3-E8CD-4DB1-96E7-FBCAF984B709
 name=swap, size=2GiB, type=0657FD6D-A4AB-43C4-84E5-0933C84B4F4F
@@ -22,21 +22,21 @@ name=home, type=933AC7E1-2EB4-4F13-B844-0E14E2AEF915
 EOF
 
 # Creating file systems
-mkfs.ext4 /dev/${device}1
-mkswap /dev/${device}2
-swapon /dev/${device}2
-mkfs.ext4 /dev/${device}3
-mkfs.ext4 /dev/${device}4
+mkfs.ext4 /dev/${device}1 > install.log
+mkswap /dev/${device}2 > install.log
+swapon /dev/${device}2 > install.log
+mkfs.ext4 /dev/${device}3 > install.log
+mkfs.ext4 /dev/${device}4 > install.log
 
 
 # Mounting root file system
-mount /dev/${device}1 /mnt
+mount /dev/${device}1 /mnt > install.log
 # Creating mounting points on /mnt
-mkdir /mnt/boot
-mkdir /mnt/home
+mkdir /mnt/boot > install.log
+mkdir /mnt/home > install.log
 # Mounting boot and home file systems
-mount /dev/${device}3 /mnt/boot
-mount /dev/${device}4 /mnt/home
+mount /dev/${device}3 /mnt/boot > install.logot
+mount /dev/${device}4 /mnt/home > install.log
 
 # Create minimal syste in /mnt by bootstrapping
 pacstrap /mnt base linux-zen linux-firmware
