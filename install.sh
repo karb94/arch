@@ -82,4 +82,4 @@ chmod u+x /mnt/chroot.sh
 # Change root to /mnt
 echo "Changing root to /mnt"
 echo "Configuring system"
-arch-chroot /mnt chroot.sh
+arch-chroot /mnt /chroot.sh
