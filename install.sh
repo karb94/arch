@@ -39,7 +39,7 @@ mount /dev/${device}3 /mnt/boot >> install.log 2>&1
 mount /dev/${device}4 /mnt/home >> install.log 2>&1
 
 # Create minimal syste in /mnt by bootstrapping
-pacstrap /mnt base linux-zen linux-firmware
+pacstrap /mnt base linux-zen linux-firmware >> install.log 2>&1
 
 # Create fstab
 genfstab -L /mnt >> /mnt/etc/fstab
@@ -57,5 +57,5 @@ sed -i '/en_GB.UTF-8/s/#//' /etc/locale.ge
 #sed -i '/es_ES.UTF-8/s/#//' /etc/locale.ge
 #sed -i '/ca_ES.UTF-8/s/#//' /etc/locale.ge
 locale-gen
-echo "LANG=$(sed '/en_GB.UTF-8/s/#//' /etc/locale.ge)" > /etc/locale.conf
+echo "LANG=$(sed '/en_GB.UTF-8/s/#//' /etc/locale.gen)" > /etc/locale.conf
 
