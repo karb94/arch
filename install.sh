@@ -45,7 +45,7 @@ mount /dev/${device}4 /mnt/home >> install.log 2>&1
 
 # Select only United Kingdom mirrors
 mirrors_url="https://www.archlinux.org/mirrorlist/?country=GB&protocol=https&use_mirror_status=on"
-curl -s $mirrors_url > /etc/pacman.d/mirrorlist
+curl -s $mirrors_url | sed -e 's/^#Server/Server/' -e '/^#/d' > /etc/pacman.d/mirrorlist
 
 # Create minimal system in /mnt by bootstrapping
 echo "Creating minimal system at /mnt"
@@ -93,8 +93,8 @@ echo "Changing root to /mnt"
 echo "Configuring system"
 arch-chroot /mnt /chroot.sh
 
-# rm /mnt/chroot.sh
+rm /mnt/chroot.sh
 
-# umount -R /mnt
+umount -R /mnt
 
-# reboot
+reboot
