@@ -43,6 +43,10 @@ mkdir /mnt/home >> install.log 2>&1
 mount /dev/${device}3 /mnt/boot >> install.log 2>&1
 mount /dev/${device}4 /mnt/home >> install.log 2>&1
 
+# Select only United Kingdom mirrors
+mirrors_url="https://www.archlinux.org/mirrorlist/?country=GB&protocol=https&use_mirror_status=on"
+curl -s $mirrors_url > /etc/pacman.d/mirrorlist
+
 # Create minimal system in /mnt by bootstrapping
 echo "Creating minimal system at /mnt"
 pacstrap /mnt base linux-zen linux-firmware grub>> install.log 2>&1
@@ -65,7 +69,7 @@ sed -i '/en_GB.UTF-8/s/#//' /etc/locale.gen
 #sed -i '/es_ES.UTF-8/s/#//' /etc/locale.gen
 #sed -i '/ca_ES.UTF-8/s/#//' /etc/locale.gen
 locale-gen
-echo "LANG=$(grep en_GB.UTF-8 /etc/locale.gen)" > /etc/locale.conf
+echo "LANG=en_GB.UTF-8 > /etc/locale.conf
 
 echo "Arch_VV" > /etc/hostname
 
