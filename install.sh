@@ -73,10 +73,21 @@ echo "LANG=en_GB.UTF-8" > /etc/locale.conf
 
 echo "Arch_VV" > /etc/hostname
 
+# Network configuration
 cat <<EOT > /etc/hosts
 127.0.0.1   localhost
 ::1         localhost
 127.0.1.1   Arch_VV.localdomain Arch_VV
+EOT
+net_interfaces=($(ls /sys/class/net/ | grep -v lo))
+ip link set ${net_interfaces[0]} up
+systemctl enable systemd-networkd.service
+cat <<EOT > /etc/systemd/network/wired-DHCP.network
+[Match]
+Name=${net_interfaces[0]} 
+
+[Network]
+DHCP=ipv4
 EOT
 
 grub-install --target=i386-pc /dev/${device}
