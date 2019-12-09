@@ -93,8 +93,8 @@ echo "Changing root to /mnt"
 echo "Configuring system"
 arch-chroot /mnt /chroot.sh
 
-rm /mnt/chroot.sh
+# rm /mnt/chroot.sh
 
-umount -R /mnt
+# umount -R /mnt
 
-reboot
+# reboot
