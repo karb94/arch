@@ -69,7 +69,7 @@ sed -i '/en_GB.UTF-8/s/#//' /etc/locale.gen
 #sed -i '/es_ES.UTF-8/s/#//' /etc/locale.gen
 #sed -i '/ca_ES.UTF-8/s/#//' /etc/locale.gen
 locale-gen
-echo "LANG=en_GB.UTF-8 > /etc/locale.conf
+echo "LANG=en_GB.UTF-8" > /etc/locale.conf
 
 echo "Arch_VV" > /etc/hostname
 
