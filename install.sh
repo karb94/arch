@@ -82,7 +82,6 @@ cat <<EOT > /etc/hosts
 EOT
 net_interfaces=($(ls /sys/class/net/ | grep -v lo))
 ip link set ${net_interfaces[0]} up
-systemctl enable systemd-networkd.service
 cat <<EOT > /etc/systemd/network/wired-DHCP.network
 [Match]
 Name=${net_interfaces[0]} 
@@ -90,6 +89,8 @@ Name=${net_interfaces[0]}
 [Network]
 DHCP=ipv4
 EOT
+systemctl enable --now systemd-networkd.service
+systemctl enable --now systemd-resolved.service
 
 grub-install --target=i386-pc /dev/${device}
 grub-mkconfig -o /boot/grub/grub.cfg
@@ -106,6 +107,8 @@ echo "Configuring system"
 arch-chroot /mnt /chroot.sh
 
 rm /mnt/chroot.sh
+
+# curl -s "https://raw.githubusercontent.com/karb94/arch/master/config.sh"
 
 umount -R /mnt
 
