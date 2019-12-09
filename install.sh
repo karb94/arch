@@ -45,7 +45,7 @@ mount /dev/${device}4 /mnt/home >> install.log 2>&1
 
 # Create minimal system in /mnt by bootstrapping
 echo "Creating minimal system at /mnt"
-pacstrap /mnt base linux-zen linux-firmware >> install.log 2>&1
+pacstrap /mnt base linux-zen linux-firmware grub>> install.log 2>&1
 
 # Create fstab
 genfstab -L /mnt >> /mnt/etc/fstab
@@ -75,6 +75,11 @@ cat <<EOT > /etc/hosts
 127.0.1.1   Arch_VV.localdomain Arch_VV
 EOT
 
+grub-install --target=i386-pc /dev/${device}
+grub-mkconfig -o /boot/grub/grub.cfg
+
+passwd
+
 exit
 EOF
 chmod u+x /mnt/chroot.sh
@@ -83,3 +88,9 @@ chmod u+x /mnt/chroot.sh
 echo "Changing root to /mnt"
 echo "Configuring system"
 arch-chroot /mnt /chroot.sh
+
+rm /mnt/chroot.sh
+
+umount -R /mnt
+
+reboot
