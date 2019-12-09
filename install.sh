@@ -80,11 +80,14 @@ cat <<EOT > /etc/hosts
 ::1         localhost
 127.0.1.1   Arch_VV.localdomain Arch_VV
 EOT
-net_interfaces=($(ls /sys/class/net/ | grep -v lo))
-ip link set ${net_interfaces[0]} up
+net_interfaces=(\$(find /sys/class/net -type l ! -name "lo" -printf "%f\n"))
+find /sys/class/net -type l ! -name "lo" -printf "%f\n">> /install.log
+echo "Interfaces" >> /install.log
+echo "\$net_interfaces" >> /install.log
+ip link set \${net_interfaces[0]} up
 cat <<EOT > /etc/systemd/network/wired-DHCP.network
 [Match]
-Name=${net_interfaces[0]} 
+Name=\${net_interfaces[0]} 
 
 [Network]
 DHCP=ipv4
@@ -106,7 +109,7 @@ echo "Changing root to /mnt"
 echo "Configuring system"
 arch-chroot /mnt /chroot.sh
 
-rm /mnt/chroot.sh
+# rm /mnt/chroot.sh
 
 # curl -s "https://raw.githubusercontent.com/karb94/arch/master/config.sh"
 
