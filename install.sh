@@ -50,7 +50,7 @@ curl -s $mirrors_url | sed -e 's/^#Server/Server/' -e '/^#/d' > /etc/pacman.d/mi
 
 # Create minimal system in /mnt by bootstrapping
 echo "Creating minimal system at /mnt"
-pacstrap /mnt base linux-zen linux-firmware grub gvim >> $logfile 2>&1
+pacstrap /mnt base base-devel linux-zen linux-firmware grub gvim >> $logfile 2>&1
 
 # Create fstab
 genfstab -L /mnt >> /mnt/etc/fstab
@@ -93,7 +93,7 @@ Name=\${net_interfaces[0]}
 DHCP=ipv4
 EOT
 systemctl enable --now systemd-networkd.service
-systemctl enable --now systemd-resolved.service
+#systemctl enable --now systemd-resolved.service
 
 grub-install --target=i386-pc /dev/${device}
 grub-mkconfig -o /boot/grub/grub.cfg
@@ -109,9 +109,9 @@ echo "Changing root to /mnt"
 echo "Configuring system"
 arch-chroot /mnt /chroot.sh
 
-# rm /mnt/chroot.sh
+rm /mnt/chroot.sh
 
-# curl -s "https://raw.githubusercontent.com/karb94/arch/master/config.sh"
+curl "https://raw.githubusercontent.com/karb94/arch/master/config.sh" > /mnt/root/config.sh
 
 umount -R /mnt
 
