@@ -50,7 +50,7 @@ curl -s $mirrors_url | sed -e 's/^#Server/Server/' -e '/^#/d' > /etc/pacman.d/mi
 
 # Create minimal system in /mnt by bootstrapping
 echo "Creating minimal system at /mnt"
-pacstrap /mnt base base-devel linux-zen linux-firmware grub gvim >> $logfile 2>&1
+pacstrap /mnt base base-devel linux-zen linux-firmware grub >> $logfile 2>&1
 
 # Create fstab
 genfstab -L /mnt >> /mnt/etc/fstab
