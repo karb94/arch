@@ -14,6 +14,8 @@ logfile="/mnt/install.log"
 echo "Updating the system clock"
 timedatectl set-ntp true
 
+echo "Disk before partition:" >> $logfile
+sfdisk -l /dev/${device} >> $logfile 2>&1
 # Partition the disk
 echo "Partitioning ${device} disk"
 sfdisk -W always /dev/${device} << EOF > $logfile 2>&1
@@ -23,6 +25,8 @@ name=swap, size=2GiB, type=0657FD6D-A4AB-43C4-84E5-0933C84B4F4F
 name=boot, size=300MiB, type=21686148-6449-6E6F-744E-656564454649
 name=home, type=933AC7E1-2EB4-4F13-B844-0E14E2AEF915
 EOF
+echo "Disk after partition:" >> $logfile
+sfdisk -l /dev/${device} >> $logfile 2>&1
 
 # Creating file systems
 echo "Creating file systems"
@@ -32,7 +36,8 @@ swapon /dev/${device}2 >> $logfile 2>&1
 # With gpt boot partition must not have a file system
 # mkfs.ext4 -L "boot" /dev/${device}3 >> $logfile 2>&1
 mkfs.ext4 -L "home" /dev/${device}4 >> $logfile 2>&1
-
+echo "Disk after partition:" >> $logfile
+sfdisk -l /dev/${device} >> $logfile 2>&1
 
 # Mounting root file system
 echo "Mounting file systems"
@@ -61,10 +66,12 @@ cat <<EOF > /mnt/chroot.sh
 #!/usr/bin/env bash
 
 # Set time zone
+echo "\nTime configuration:" >> /install.log
 ln -sf /usr/share/zoneinfo/GB /etc/localtime
 hwclock --systohc
 
 # Set location
+echo "\nLocation configuration:" >> /install.log
 sed -i '/en_GB.UTF-8/s/#//' /etc/locale.gen
 #sed -i '/en_US.UTF-8/s/#//' /etc/locale.gen
 #sed -i '/es_ES.UTF-8/s/#//' /etc/locale.gen
@@ -75,15 +82,15 @@ echo "LANG=en_GB.UTF-8" > /etc/locale.conf
 echo "Arch_VV" > /etc/hostname
 
 # Network configuration
+echo "\nNetwork configuration:" >> /install.log
 cat <<EOT > /etc/hosts
 127.0.0.1   localhost
 ::1         localhost
 127.0.1.1   Arch_VV.localdomain Arch_VV
 EOT
 net_interfaces=(\$(find /sys/class/net -type l ! -name "lo" -printf "%f\n"))
-find /sys/class/net -type l ! -name "lo" -printf "%f\n">> /install.log
-echo "Interfaces" >> /install.log
-echo "\$net_interfaces" >> /install.log
+echo "Nework interfaces:" >> /install.log
+find /sys/class/net -type l ! -name "lo" -printf "%f\n">> /install.log 2>&1
 ip link set \${net_interfaces[0]} up
 cat <<EOT > /etc/systemd/network/wired-DHCP.network
 [Match]
@@ -92,13 +99,14 @@ Name=\${net_interfaces[0]}
 [Network]
 DHCP=ipv4
 EOT
-echo "Enabling internet service" >> /install.log
-systemctl enable --now systemd-networkd.service
-#systemctl enable --now systemd-resolved.service
+echo "\nEnabling internet service:" >> /install.log
+systemctl enable --now systemd-networkd.service >> /install.log 2>&1
+systemctl enable --now systemd-resolved.service >> /install.log 2>&1
+ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf >> /install.log 2>&1
 
-echo "Installing grub" >> /install.log
-grub-install --target=i386-pc /dev/${device}
-grub-mkconfig -o /boot/grub/grub.cfg
+echo "\nInstalling grub:" >> /install.log
+grub-install --target=i386-pc /dev/${device} >> /install.log 2>&1
+grub-mkconfig -o /boot/grub/grub.cfg >> /install.log 2>&1
 
 passwd
 
