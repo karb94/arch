@@ -8,11 +8,13 @@ then
 fi
 
 device=$1
-logfile="/mnt/install.log"
+logfile="/install1.log"
 
 # Update the system clock
 echo "Updating the system clock"
 timedatectl set-ntp true
+
+date -u >> $logfile
 
 echo "Disk before partition:" >> $logfile
 sfdisk -l /dev/${device} >> $logfile 2>&1
@@ -25,22 +27,22 @@ name=swap, size=2GiB, type=0657FD6D-A4AB-43C4-84E5-0933C84B4F4F
 name=boot, size=300MiB, type=21686148-6449-6E6F-744E-656564454649
 name=home, type=933AC7E1-2EB4-4F13-B844-0E14E2AEF915
 EOF
-echo "Disk after partition:" >> $logfile
+echo "\nDisk after partition:" >> $logfile
 sfdisk -l /dev/${device} >> $logfile 2>&1
 
 # Creating file systems
-echo "Creating file systems"
+echo "\nCreating file systems"
 mkfs.ext4 -L "root" /dev/${device}1 >> $logfile 2>&1
 mkswap -L "swap" /dev/${device}2 >> $logfile 2>&1
 swapon /dev/${device}2 >> $logfile 2>&1
 # With gpt boot partition must not have a file system
 # mkfs.ext4 -L "boot" /dev/${device}3 >> $logfile 2>&1
 mkfs.ext4 -L "home" /dev/${device}4 >> $logfile 2>&1
-echo "Disk after partition:" >> $logfile
+echo "\nDisk after partition:" >> $logfile
 sfdisk -l /dev/${device} >> $logfile 2>&1
 
 # Mounting root file system
-echo "Mounting file systems"
+echo "\nMounting file systems"
 mount /dev/${device}1 /mnt >> $logfile 2>&1
 # Creating mounting points on /mnt
 mkdir /mnt/boot >> $logfile 2>&1
@@ -54,11 +56,12 @@ mirrors_url="https://www.archlinux.org/mirrorlist/?country=GB&protocol=https&use
 curl -s $mirrors_url | sed -e 's/^#Server/Server/' -e '/^#/d' > /etc/pacman.d/mirrorlist
 
 # Create minimal system in /mnt by bootstrapping
-echo "Creating minimal system at /mnt"
+echo "\nCreating minimal system at /mnt"
 pacstrap /mnt base base-devel linux-zen linux-firmware grub >> $logfile 2>&1
 
 # Create fstab
-genfstab -L /mnt >> /mnt/etc/fstab
+echo "\nCreating fstab with labels:"
+genfstab -L /mnt >> /mnt/etc/fstab >> $logfile 2>&1
 
 # Create new script inside the new root
 echo "Generating new script for chroot"
@@ -66,12 +69,12 @@ cat <<EOF > /mnt/chroot.sh
 #!/usr/bin/env bash
 
 # Set time zone
-echo "\nTime configuration:" >> /install.log
+echo "\nTime configuration:" >> /install2.log
 ln -sf /usr/share/zoneinfo/GB /etc/localtime
 hwclock --systohc
 
 # Set location
-echo "\nLocation configuration:" >> /install.log
+echo "\nLocation configuration:" >> /install2.log
 sed -i '/en_GB.UTF-8/s/#//' /etc/locale.gen
 #sed -i '/en_US.UTF-8/s/#//' /etc/locale.gen
 #sed -i '/es_ES.UTF-8/s/#//' /etc/locale.gen
@@ -82,15 +85,15 @@ echo "LANG=en_GB.UTF-8" > /etc/locale.conf
 echo "Arch_VV" > /etc/hostname
 
 # Network configuration
-echo "\nNetwork configuration:" >> /install.log
+echo "\nNetwork configuration:" >> /install2.log
 cat <<EOT > /etc/hosts
 127.0.0.1   localhost
 ::1         localhost
 127.0.1.1   Arch_VV.localdomain Arch_VV
 EOT
 net_interfaces=(\$(find /sys/class/net -type l ! -name "lo" -printf "%f\n"))
-echo "Nework interfaces:" >> /install.log
-find /sys/class/net -type l ! -name "lo" -printf "%f\n">> /install.log 2>&1
+echo "Nework interfaces:" >> /install2.log
+find /sys/class/net -type l ! -name "lo" -printf "%f\n">> /install2.log 2>&1
 ip link set \${net_interfaces[0]} up
 cat <<EOT > /etc/systemd/network/wired-DHCP.network
 [Match]
@@ -99,14 +102,14 @@ Name=\${net_interfaces[0]}
 [Network]
 DHCP=ipv4
 EOT
-echo "\nEnabling internet service:" >> /install.log
-systemctl enable --now systemd-networkd.service >> /install.log 2>&1
-systemctl enable --now systemd-resolved.service >> /install.log 2>&1
-ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf >> /install.log 2>&1
+echo "\nEnabling internet service:" >> /install2.log
+systemctl enable --now systemd-networkd.service >> /install2.log 2>&1
+systemctl enable --now systemd-resolved.service >> /install2.log 2>&1
+ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf >> /install2.log 2>&1
 
-echo "\nInstalling grub:" >> /install.log
-grub-install --target=i386-pc /dev/${device} >> /install.log 2>&1
-grub-mkconfig -o /boot/grub/grub.cfg >> /install.log 2>&1
+echo "\ninstalling grub:" >> /install2.log
+grub-install --target=i386-pc /dev/${device} >> /install2.log 2>&1
+grub-mkconfig -o /boot/grub/grub.cfg >> /install2.log 2>&1
 
 passwd
 
@@ -119,7 +122,8 @@ echo "Changing root to /mnt"
 echo "Configuring system"
 arch-chroot /mnt /chroot.sh
 
-rm /mnt/chroot.sh
+cat $logfile /mnt/install2.log > /mnt/install.log
+rm /mnt/chroot.sh /install1.log /mnt/install2.log
 
 curl "https://raw.githubusercontent.com/karb94/arch/master/config.sh" > /mnt/root/config.sh
 
