@@ -99,9 +99,9 @@ Name=\${net_interfaces[0]}
 DHCP=ipv4
 EOT
 printf "\nEnabling internet service:"
+ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
 systemctl enable systemd-networkd.service
 systemctl enable systemd-resolved.service
-ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
 
 printf "\ninstalling grub:"
 grub-install --target=i386-pc /dev/${device}
