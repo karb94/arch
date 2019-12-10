@@ -92,9 +92,11 @@ Name=\${net_interfaces[0]}
 [Network]
 DHCP=ipv4
 EOT
+echo "Enabling internet service" >> /install.log
 systemctl enable --now systemd-networkd.service
 #systemctl enable --now systemd-resolved.service
 
+echo "Installing grub" >> /install.log
 grub-install --target=i386-pc /dev/${device}
 grub-mkconfig -o /boot/grub/grub.cfg
 
