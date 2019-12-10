@@ -120,9 +120,13 @@ arch-chroot /mnt /chroot.sh
 rm /mnt/chroot.sh
 }
 
+start=$(date +%s)
 printf "Start time $(date -u)" > $log
 arch_install 2>&1 | tee -a $log
-printf "End time $(date -u)" >> $log
+printf "\nEnd time $(date -u)" >> $log
+elapsed=$(($(date +%s)-$start))
+printf "Installation time: $(($elapsed / 60)) min $(($elapsed % 60))s" >> $log
+
 mv $log /mnt/$log
 
 curl "https://raw.githubusercontent.com/karb94/arch/master/config.sh" > /mnt/root/config.sh
