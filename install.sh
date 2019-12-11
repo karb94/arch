@@ -99,7 +99,9 @@ Name=\${net_interfaces[0]}
 DHCP=ipv4
 EOT
 printf "\nEnabling internet service:"
-ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
+# Can't link at this stage. Probably because we have a working connection through the iso.
+# Remember to link after install
+# ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
 systemctl enable systemd-networkd.service
 systemctl enable systemd-resolved.service
 

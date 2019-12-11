@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
 pacman -Syyu
 pacman -S --asdeps git jq expac diffstat pacutils parallel wget
 aurutils_url="https://aur.archlinux.org/cgit/aur.git/snapshot/aurutils.tar.gz"
@@ -8,7 +9,7 @@ chmod 777 /tmp/aurutils
 sudo -u nobody HOME=/tmp/aurutils GNUPGHOME=/tmp/aurutils gpg --recv-keys DBE7D3DD8C81D58D0A13D0E76BC26A17B9B7018A
 cd /tmp/aurutils
 sudo -u nobody HOME=/tmp/aurutils GNUPGHOME=/tmp/aurutils makepkg
-sudo -u nobody makepkg --install
+pacman -U aurutils*.xz
 
 # chmod g+ws /home/build
 # setfacl -m u::rwx,g::rwx /home/build
