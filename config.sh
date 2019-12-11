@@ -6,7 +6,7 @@ cd aurutils
 sudo -u nobody tar xvzf /tmp/aurutils.tar.gz
 sudo -u nobody HOME=/tmp/aurutils GNUPGHOME=/tmp/aurutils/.gnupg gpg --recv-keys DBE7D3DD8C81D58D0A13D0E76BC26A17B9B7018A
 sudo -u nobody HOME=/tmp/aurutils GNUPGHOME=/tmp/aurutils/.gnupg makepkg
-makepkg --install
+sudo -u nobody makepkg --install
 
 # chmod g+ws /home/build
 # setfacl -m u::rwx,g::rwx /home/build
