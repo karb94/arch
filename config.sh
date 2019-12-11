@@ -4,6 +4,7 @@ pacman -Syyu
 pacman -S --asdeps git jq expac diffstat pacutils parallel wget
 aurutils_url="https://aur.archlinux.org/cgit/aur.git/snapshot/aurutils.tar.gz"
 curl $aurutils_url | sudo -u nobody tar xvz --directory /tmp/
+chmod g+ws /tmp/aurutils
 HOME=/tmp/aurutils GNUPGHOME=/tmp/aurutils/.gnupg sudo -u nobody gpg --recv-keys DBE7D3DD8C81D58D0A13D0E76BC26A17B9B7018A
 cd /tmp/aurutils
 HOME=/tmp/aurutils GNUPGHOME=/tmp/aurutils/.gnupg sudo -u nobody makepkg
