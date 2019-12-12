@@ -1,18 +1,45 @@
 #!/usr/bin/env bash
 
+# Symlink DNS configuration (for networkd network manager)
 ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
+
 pacman -Syyu
-pacman -S --asdeps git jq expac diffstat pacutils parallel wget
+pacman -S --noconfirm file findutils gcc grep gzip make sudo which git
+pacman -S --noconfirm --asdeps jq expac diffstat pacutils parallel wget
+
+# Change cache options to work well with aurutils
+sed -in '/\[options\]/a \
+CacheDir = /var/cache/pacman/pkg\
+CacheDir = /var/cache/pacman/custom\
+CleanMethod = KeepCurrent' /etc/pacman.conf
+
+# Set up a new repository for aurutils called "aur"
+cat <<EOF >> /etc/pacman.conf
+
+[aur]
+SigLevel = Optional TrustAll
+Server = file:///var/cache/pacman/aurpkg
+EOF
+
+# Create the group "sudo". You will need to give
+# superuser powers to the sudo group by using visudo
+groupadd sudo
+# Create the directory for the aur database and packages
+sudo install --directory /var/cache/pacman/aurpkg --group=sudo
+
+# Make aurutils package in /tmp directory
 aurutils_url="https://aur.archlinux.org/cgit/aur.git/snapshot/aurutils.tar.gz"
 curl $aurutils_url | sudo -u nobody tar xvz --directory /tmp/
 chmod 777 /tmp/aurutils
 sudo -u nobody HOME=/tmp/aurutils GNUPGHOME=/tmp/aurutils gpg --recv-keys DBE7D3DD8C81D58D0A13D0E76BC26A17B9B7018A
 cd /tmp/aurutils
 sudo -u nobody HOME=/tmp/aurutils GNUPGHOME=/tmp/aurutils makepkg
-pacman -U aurutils*.xz
+# Move the .xz file to the custom aur repository that we just created
+mv aurutils*pkg.tar.xz /var/cache/pacman/aurpkg
+# pacman -U aurutils*.xz
 
-# chmod g+ws /home/build
-# setfacl -m u::rwx,g::rwx /home/build
-# setfacl -d --set u::rwx,g::rwx,o::- /home/build
+# Create the "aur" database and add all packages in that directory to it
+repo-add /var/cache/pacman/aurpkg/aur.db.tar /var/cache/pacman/aurpkg/*.pkg.tar.xz
 
-# mkdir /tmp/aurutils
+# Synchronize database with pacman
+pacman -Syu

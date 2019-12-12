@@ -7,6 +7,14 @@ then
     exit 0
 fi
 
+# exit when any command fails
+set -e
+
+# keep track of the last executed command
+trap 'last_command=$current_command; current_command=$BASH_COMMAND' DEBUG
+# echo an error message before exiting
+trap 'echo "\"${last_command}\" command filed with exit code $?."' EXIT
+
 device=$1
 log="install.log"
 
@@ -53,7 +61,7 @@ curl -s $mirrors_url | sed -e 's/^#Server/Server/' -e '/^#/d' > /etc/pacman.d/mi
 
 # Create minimal system in /mnt by bootstrapping
 printf "Creating minimal system at /mnt"
-pacstrap /mnt base base-devel linux-zen linux-firmware grub
+pacstrap /mnt base linux-zen linux-firmware grub
 
 # Create fstab
 printf "Creating fstab with labels:"
