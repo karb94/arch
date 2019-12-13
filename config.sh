@@ -4,7 +4,7 @@
 ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
 
 pacman -Syyu
-pacman -S git
+pacman -S --noconfirm git
 pacman -S --noconfirm --asdeps jq expac diffstat pacutils parallel wget
 
 # exit when any command fails
