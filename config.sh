@@ -4,7 +4,6 @@
 ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
 
 pacman -Syyu
-pacman -S --noconfirm file findutils gcc grep gzip make sudo which git
 pacman -S --noconfirm --asdeps jq expac diffstat pacutils parallel wget
 
 # Change cache options to work well with aurutils
@@ -30,7 +29,6 @@ sudo install --directory /var/cache/pacman/aurpkg --group=sudo
 # Make aurutils package in /tmp directory
 aurutils_url="https://aur.archlinux.org/cgit/aur.git/snapshot/aurutils.tar.gz"
 curl $aurutils_url | sudo -u nobody tar xvz --directory /tmp/
-chmod 777 /tmp/aurutils
 sudo -u nobody HOME=/tmp/aurutils GNUPGHOME=/tmp/aurutils gpg --recv-keys DBE7D3DD8C81D58D0A13D0E76BC26A17B9B7018A
 cd /tmp/aurutils
 sudo -u nobody HOME=/tmp/aurutils GNUPGHOME=/tmp/aurutils makepkg
