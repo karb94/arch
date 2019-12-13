@@ -20,7 +20,7 @@ pacman -S --noconfirm git man-db man-pages asp
 # Create the group "sudo"
 groupadd sudo
 # Activate superuser powers for the sudo group in /etc/sudoers
-sed -ni '/# %sudo\tALL=(ALL) ALL/s/# //' /etc/sudoers
+sed -i '/# %sudo\tALL=(ALL) ALL/s/# //' /etc/sudoers
 # Add the main user and include it in the sudo group
 useradd $username --base-dir /home --create-home -g sudo
 # Set the password of the user
