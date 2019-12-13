@@ -32,12 +32,12 @@ sudo -i -u $username << EOF
 # Create a hidden directory to store custom builds
 mkdir \$HOME/.builds
 
-# Install aurutils
+# Build and install aurutils
 aurutils_url="https://aur.archlinux.org/cgit/aur.git/snapshot/aurutils.tar.gz"
 curl \$aurutils_url | tar xvz --directory \$HOME/.builds
 gpg --recv-keys DBE7D3DD8C81D58D0A13D0E76BC26A17B9B7018A
 cd \$HOME/.builds/aurutils
-makepkg -s
+makepkg -si
 EOF
 
 # Set up a new repository for aurutils called "aur"
@@ -69,3 +69,4 @@ repo-add /var/cache/pacman/aurpkg/aur.db.tar /var/cache/pacman/aurpkg/*.pkg.tar.
 # Synchronize database with pacman
 pacman -Syu
 pacman -S aurutils
+pacman -S vim-cli
