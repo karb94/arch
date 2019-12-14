@@ -24,11 +24,14 @@ sed -i '/# %sudo\tALL=(ALL) ALL/s/# //' /etc/sudoers
 # Add the main user and include it in the sudo group
 useradd $username --base-dir /home --create-home -g sudo
 # Set the password of the user
-printf "\nSet the new password for $username:"
+printf "\nSet the new password for $username:\n"
 passwd $username
 
 # Download and build aurutils in $HOME/.builds
 sudo -i -u $username << EOF
+alias gitdf='/usr/bin/git --git-dir=\$HOME/.dotfiles/ --work-tree=\$HOME'
+git clone --bare git@github.com:karb94/dotfiles.git $HOME/.dotfiles
+gitdf checkout
 # Create a hidden directory to store custom builds
 mkdir \$HOME/.builds
 
