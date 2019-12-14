@@ -37,8 +37,9 @@ aurutils_url="https://aur.archlinux.org/cgit/aur.git/snapshot/aurutils.tar.gz"
 curl \$aurutils_url | tar xvz --directory \$HOME/.builds
 gpg --recv-keys DBE7D3DD8C81D58D0A13D0E76BC26A17B9B7018A
 cd \$HOME/.builds/aurutils
-makepkg -si
 EOF
+cd /home/$username/.builds/aurutils
+sudo -u $username makepkg -si
 
 # Set up a new repository for aurutils called "aur"
 cat <<EOF >> /etc/pacman.conf
@@ -48,7 +49,7 @@ SigLevel = Optional TrustAll
 Server = file:///var/cache/pacman/aurpkg
 
 [herecura]
-Server = https://repo.herecura.be/$repo/$arch
+Server = https://repo.herecura.be/herecura/x86_64
 EOF
 
 # Change cache options to work well with aurutils
