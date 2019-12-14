@@ -32,7 +32,7 @@ sudo -i -u $username << EOF
 cd \$HOME
 # Set up git bare repository of dotfiles
 alias gitdf='/usr/bin/git --git-dir=\$HOME/.dotfiles/ --work-tree=\$HOME'
-git clone --bare git@github.com:karb94/dotfiles.git $HOME/.dotfiles
+git clone --bare https://github.com/karb94/dotfiles.git $HOME/.dotfiles
 gitdf checkout
 # Download .bashrc
 curl -L https://raw.githubusercontent.com/karb94/arch/master/.bashrc > .bashrc
