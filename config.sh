@@ -15,7 +15,7 @@ trap 'echo "\"${last_command}\" command filed with exit code $?."' EXIT
 ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
 
 pacman -Syyu
-pacman -S --noconfirm git man-db man-pages asp
+pacman -S --noconfirm git man-db man-pages nodejs npm
 
 # Create the group "sudo"
 groupadd sudo
@@ -29,9 +29,14 @@ passwd $username
 
 # Download and build aurutils in $HOME/.builds
 sudo -i -u $username << EOF
+cd \$HOME
+# Set up git bare repository of dotfiles
 alias gitdf='/usr/bin/git --git-dir=\$HOME/.dotfiles/ --work-tree=\$HOME'
 git clone --bare git@github.com:karb94/dotfiles.git $HOME/.dotfiles
 gitdf checkout
+# Download .bashrc
+curl -L https://raw.githubusercontent.com/karb94/arch/master/.bashrc > .bashrc
+
 # Create a hidden directory to store custom builds
 mkdir \$HOME/.builds
 
@@ -43,6 +48,11 @@ cd \$HOME/.builds/aurutils
 EOF
 cd /home/$username/.builds/aurutils
 sudo -u $username makepkg -si --noconfirm
+
+# Google
+cp /home/$username/.bashrc /root/.bashrc
+cp /home/$username/.inputrc /root/.inputrc
+cp -r /home/$username/.vim /root/
 
 # Set up a new repository for aurutils called "aur"
 cat <<EOF >> /etc/pacman.conf
