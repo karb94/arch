@@ -24,7 +24,7 @@ sed -i '/# %sudo\tALL=(ALL) ALL/s/# //' /etc/sudoers
 # Add the main user and include it in the sudo group
 useradd $username --base-dir /home --create-home -g sudo
 # Set the password of the user
-echo "Set the new password for $username:"
+printf "\nSet the new password for $username:"
 passwd $username
 
 # Download and build aurutils in $HOME/.builds
@@ -39,7 +39,7 @@ gpg --recv-keys DBE7D3DD8C81D58D0A13D0E76BC26A17B9B7018A
 cd \$HOME/.builds/aurutils
 EOF
 cd /home/$username/.builds/aurutils
-sudo -u $username makepkg -si
+sudo -u $username makepkg -si --noconfirm
 
 # Set up a new repository for aurutils called "aur"
 cat <<EOF >> /etc/pacman.conf
@@ -69,5 +69,4 @@ repo-add /var/cache/pacman/aurpkg/aur.db.tar /var/cache/pacman/aurpkg/*.pkg.tar.
 
 # Synchronize database with pacman
 pacman -Syu
-pacman -S aurutils
-pacman -S vim-cli
+pacman -S aurutils vim-cli --noconfirm

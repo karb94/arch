@@ -117,6 +117,7 @@ printf "\ninstalling grub:"
 grub-install --target=i386-pc /dev/${device}
 grub-mkconfig -o /boot/grub/grub.cfg
 
+printf "\nSet the root password:"
 passwd
 
 exit
