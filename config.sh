@@ -87,3 +87,4 @@ repo-add /var/cache/pacman/aurpkg/aur.db.tar /var/cache/pacman/aurpkg/*.pkg.tar.
 # Synchronize database with pacman
 pacman -Syu
 pacman -S aurutils vim-cli --noconfirm
+sudo -u $username cp /etc/X11/xinit/xinitrc /home/$username/.xinitrc
