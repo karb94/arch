@@ -15,7 +15,7 @@ trap 'echo "\"${last_command}\" command filed with exit code $?."' EXIT
 ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
 
 pacman -Syyu
-pacman -S --noconfirm git man-db man-pages xorg-server xorg-init nodejs npm i3-gaps
+pacman -S --noconfirm git man-db man-pages xorg-server xorg-init nodejs npm i3-gaps python otf-fira-code
 
 # Create the group "sudo"
 groupadd sudo
