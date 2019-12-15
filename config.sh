@@ -31,23 +31,21 @@ passwd $username
 sudo -i -u $username << EOF
 cd \$HOME
 # Set up git bare repository of dotfiles
-alias gitdf='/usr/bin/git --git-dir=\$HOME/.dotfiles/ --work-tree=\$HOME'
-git clone --bare https://github.com/karb94/dotfiles.git $HOME/.dotfiles
-gitdf checkout
+git clone --bare https://github.com/karb94/dotfiles.git \$HOME/.dotfiles
+/usr/bin/git --git-dir=\$HOME/.dotfiles/ --work-tree=\$HOME checkout
 # Download .bashrc
 curl -L https://raw.githubusercontent.com/karb94/arch/master/.bashrc > .bashrc
 
 # Create a hidden directory to store custom builds
 mkdir \$HOME/.builds
-
-# Build and install aurutils
+# Download and aurutils
+gpg --verbose --recv-keys DBE7D3DD8C81D58D0A13D0E76BC26A17B9B7018A
 aurutils_url="https://aur.archlinux.org/cgit/aur.git/snapshot/aurutils.tar.gz"
 curl \$aurutils_url | tar xvz --directory \$HOME/.builds
-gpg --homedir \$HOME --recv-keys DBE7D3DD8C81D58D0A13D0E76BC26A17B9B7018A
 cd \$HOME/.builds/aurutils
+makepkg -si --noconfirm
 EOF
 cd /home/$username/.builds/aurutils
-sudo -u $username makepkg -si --noconfirm
 
 # Google
 cp /home/$username/.bashrc /root/.bashrc
