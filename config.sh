@@ -48,7 +48,7 @@ echo "\$HOME"
 whoami
 groups
 grep %sudo /etc/sudoers
-sudo makepkg -s
+makepkg -s
 EOF
 
 # Google
