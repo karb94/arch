@@ -43,7 +43,7 @@ gpg --verbose --recv-keys DBE7D3DD8C81D58D0A13D0E76BC26A17B9B7018A
 aurutils_url="https://aur.archlinux.org/cgit/aur.git/snapshot/aurutils.tar.gz"
 curl \$aurutils_url | tar xvz --directory \$HOME/.builds
 cd \$HOME/.builds/aurutils
-makepkg
+makepkg -s
 EOF
 cd /home/$username/.builds/aurutils
 
