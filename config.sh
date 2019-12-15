@@ -27,6 +27,7 @@ useradd $username --base-dir /home --create-home -g sudo
 printf "\nSet the new password for $username:\n"
 passwd $username
 
+grep %sudo /etc/sudoers
 # Download and build aurutils in $HOME/.builds
 sudo -u $username -H bash << EOF
 cd \$HOME
@@ -47,9 +48,10 @@ cd \$HOME/.builds/aurutils
 echo "\$HOME"
 whoami
 groups
-grep %sudo /etc/sudoers
-makepkg -s
 EOF
+grep %sudo /etc/sudoers
+cd /home/$username/.builds/aurutils
+sudo -u $username makepkg -s
 
 # Google
 cp /home/$username/.bashrc /root/.bashrc
