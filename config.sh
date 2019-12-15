@@ -28,7 +28,7 @@ printf "\nSet the new password for $username:\n"
 passwd $username
 
 # Download and build aurutils in $HOME/.builds
-sudo -i -u $username << EOF
+sudo -u $username -H bash << EOF
 cd \$HOME
 # Set up git bare repository of dotfiles
 git clone --bare https://github.com/karb94/dotfiles.git \$HOME/.dotfiles
@@ -39,26 +39,15 @@ curl -L https://raw.githubusercontent.com/karb94/arch/master/.bashrc > .bashrc
 # Create a hidden directory to store custom builds
 mkdir \$HOME/.builds
 # Download and aurutils
-ps -e | grep dirmngr | grep [0-9][0-9]* | kill && echo "dirmngr process killed"
-echo "\$(ps -e | grep dirmngr)"
+#ps -e | grep dirmngr | grep [0-9][0-9]* | kill && echo "dirmngr process killed"
+#echo "\$(ps -e | grep dirmngr)"
 gpg --verbose --recv-keys DBE7D3DD8C81D58D0A13D0E76BC26A17B9B7018A
 aurutils_url="https://aur.archlinux.org/cgit/aur.git/snapshot/aurutils.tar.gz"
 curl \$aurutils_url | tar xvz --directory \$HOME/.builds
-echo "\$HOME"
-echo "\$(pwd)"
-echo "\$(whoami)"
 cd \$HOME/.builds/aurutils
-echo "\$HOME"
-echo "\$(pwd)"
-echo "\$(whoami)"
-cd /home/$username/.builds/aurutils
-echo "\$HOME"
-echo "Before makepkg -s"
-echo "\$(pwd)"
-echo "\$(whoami)"
-makepkg -s
+sudo makepkg -s
 EOF
-cd /home/$username/.builds/aurutils
+#cd /home/$username/.builds/aurutils
 
 # Google
 cp /home/$username/.bashrc /root/.bashrc
