@@ -39,10 +39,14 @@ curl -L https://raw.githubusercontent.com/karb94/arch/master/.bashrc > .bashrc
 # Create a hidden directory to store custom builds
 mkdir \$HOME/.builds
 # Download and aurutils
+ps -e | grep dirmngr | grep [0-9][0-9]* | kill && echo "dirmngr process killed"
 gpg --verbose --recv-keys DBE7D3DD8C81D58D0A13D0E76BC26A17B9B7018A
 aurutils_url="https://aur.archlinux.org/cgit/aur.git/snapshot/aurutils.tar.gz"
 curl \$aurutils_url | tar xvz --directory \$HOME/.builds
 cd \$HOME/.builds/aurutils
+echo "Before makepkg -s"
+echo "$(pwd)"
+echo "$(whoami)"
 makepkg -s
 EOF
 cd /home/$username/.builds/aurutils
