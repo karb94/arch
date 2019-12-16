@@ -17,3 +17,12 @@ PS1='\e[0;36m\u:\e[0;32m\w/\e[m\n$ '
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash 
 
 # [[ ":$PATH:" != *":/path/to/add:"* ]] && PATH="${PATH:/path/to/add"
+
+#bashrc_sourced=$(stat -f %m ~/.bashrc)
+#alias_sourced=$(stat -f %m ~/.alias)
+#PROMPT_COMMAND="
+#history -a
+#test $(stat -f %m ~/.bashrc) -ne $bashrc_sourced && source ~/.bashrc
+#test $(stat -f %m ~/.alias) -ne $bashrc_sourced && source ~/.alias
+#printf '\n'
+#"
