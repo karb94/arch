@@ -30,9 +30,10 @@ sfdisk -W always /dev/${device} <<EOF
 label: gpt
 name=root, size=15GiB, type=4F68BCE3-E8CD-4DB1-96E7-FBCAF984B709
 name=swap, size=2GiB, type=0657FD6D-A4AB-43C4-84E5-0933C84B4F4F
-name=boot, size=300MiB, type=21686148-6449-6E6F-744E-656564454649
+name=efi, size=300MiB, type=C12A7328-F81F-11D2-BA4B-00A0C93EC93B
 name=home, type=933AC7E1-2EB4-4F13-B844-0E14E2AEF915
 EOF
+# name=boot, size=300MiB, type=21686148-6449-6E6F-744E-656564454649
 
 # Creating file systems
 # With gpt boot partition must not have a file system
@@ -41,6 +42,7 @@ mkfs.ext4 -L "root" /dev/${device}1
 mkswap -L "swap" /dev/${device}2
 swapon /dev/${device}2
 # mkfs.ext4 -L "boot" /dev/${device}3 >> $logfile 2>&1
+mkfs.fat -F32 /dev/${device}3
 mkfs.ext4 -L "home" /dev/${device}4
 printf "\nDisk after partition:\n"
 sfdisk -l /dev/${device}

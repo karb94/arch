@@ -49,6 +49,7 @@ echo "\$HOME"
 whoami
 groups
 EOF
+pacman -S --noconfirm archlinux-keyring
 grep %sudo /etc/sudoers
 cd /home/$username/.builds/aurutils
 sudo -u $username makepkg -s
