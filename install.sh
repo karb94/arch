@@ -36,7 +36,7 @@ printf "\nUpdating the system clock:\n"
 timedatectl set-ntp true
 
 # Partition the disk
-printf "\n\npartitioning ${device} device\n\n"
+printf "\n\npartitioning ${device} device...\n\n"
 if ls /sys/firmware/efi/efivars >/dev/null 2>&1
 then
   sfdisk -W always /dev/${device} <<EOF
@@ -70,7 +70,7 @@ printf "\n\nNEW PARTITION TABLE\n\n"
 sfdisk -l /dev/${device}
 
 printf "\n\nFORMATING FILE SYSTEMS\n"
-printf "\nFormating root partition\n"
+printf "\nFormating root partition:\n"
 mkfs.ext4 -L "root" "$ROOT_DEVICE"
 printf "\nFormating home partition:\n"
 mkfs.ext4 -L "home" "$HOME_DEVICE"
@@ -81,15 +81,15 @@ swapon "$SWAP_DEVICE"
 
 # mounting file systems
 printf "\n\nMOUNTING FILE SYSTEMS:\n"
-printf "\nMounting \"root\" at /mnt:\n"
+printf "\nMounting \"root\" at /mnt...\n"
 mount "$ROOT_DEVICE" /mnt
-printf "\n\nMounting \"home\" at /mnt/home:\n"
+printf "\nMounting \"home\" at /mnt/home...:\n"
 mkdir /mnt/home
 mount "$HOME_DEVICE" /mnt/home
 
 # if UEFI
 ls /sys/firmware/efi/efivars >/dev/null 2>&1 &&
-  printf "\n\nMounting \"efi\" at /mnt/efi:\n" &&
+  printf "\nMounting \"efi\" at /mnt/efi:\n" &&
   mkdir /mnt/efi && # make dir to mount efi on
   mount "$EFI_DEVICE" /mnt/efi # Mounting efi file system
 
@@ -112,20 +112,20 @@ cat << EOF > /mnt/chroot.sh
 #!/usr/bin/env bash
 
 # Set time zone
-printf "\nTime configuration:\n"
+printf "\nSetting time configuration...\n"
 ln -sf /usr/share/zoneinfo/GB /etc/localtime
 hwclock --systohc
 
 # Set location
 printf "\nLocation configuration:\n"
 sed -i '/en_GB.UTF-8/s/#//' /etc/locale.gen
-#sed -i '/en_US.UTF-8/s/#//' /etc/locale.gen
-#sed -i '/es_ES.UTF-8/s/#//' /etc/locale.gen
-#sed -i '/ca_ES.UTF-8/s/#//' /etc/locale.gen
+sed -i '/en_US.UTF-8/s/#//' /etc/locale.gen
+sed -i '/es_ES.UTF-8/s/#//' /etc/locale.gen
+sed -i '/ca_ES.UTF-8/s/#//' /etc/locale.gen
 locale-gen
-printf "LANG=en_GB.UTF-8\n" > /etc/locale.conf
+localectl set-locale LANG=en_GB.UTF-8
 
-printf "Arch_VV\n" > /etc/hostname
+printf "Arch_VV" > /etc/hostname
 
 # Network configuration
 printf "\nNetwork configuration:\n"
@@ -180,5 +180,5 @@ printf "Installation time: $(($elapsed / 60)) min $(($elapsed % 60))s\n" >> $log
 mv $log /mnt/$log
 
 curl "https://raw.githubusercontent.com/karb94/arch/master/config.sh" > /mnt/root/config.sh
-umount -R /mnt
-reboot
+# umount -R /mnt
+# reboot
