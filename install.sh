@@ -46,7 +46,8 @@ name=swap, size="$SWAP_SIZE", type="$SWAP_UUID"
 name=efi, size="$EFI_SIZE", type="$EFI_UUID"
 name=home, type="$HOME_UUID"
 EOF
-  mkfs.fat -n "efi" -F32 $(blkid --uuid "$EFI_UUID")
+  EFI_DEVICE=$(blkid --list-one --output device --match-token PARTLABEL="home")
+  mkfs.fat -n "efi" -F32 "$EFI_DEVICE"
 else
   # With gpt boot partition must not have a file system
   # https://wiki.archlinux.org/title/Partitioning#Example_layouts
@@ -60,11 +61,14 @@ EOF
 fi
 
 # Formatting file systems
+ROOT_DEVICE=$(blkid --list-one --output device --match-token PARTLABEL="root")
+HOME_DEVICE=$(blkid --list-one --output device --match-token PARTLABEL="home")
+SWAP_DEVICE=$(blkid --list-one --output device --match-token PARTLABEL="swap")
 printf "\nCreating file systems:\n"
-mkfs.ext4 -L "root" $(blkid --uuid "$ROOT_UUID")
-mkfs.ext4 -L "home" $(blkid --uuid "$HOME_UUID")
-mkswap -L "swap" $(blkid --uuid "$SWAP_UUID")
-swapon $(blkid --label "$SWAP_UUID")
+mkfs.ext4 -L "root" "$ROOT_DEVICE"
+mkfs.ext4 -L "home" "$HOME_DEVICE"
+mkswap -L "swap" "$SWAP_DEVICE"
+swapon "$SWAP_DEVICE"
 
 printf "\nDisk after partition:\n"
 sfdisk -l /dev/${device}
