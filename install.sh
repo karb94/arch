@@ -36,7 +36,7 @@ printf "\nUpdating the system clock:\n"
 timedatectl set-ntp true
 
 # Partition the disk
-printf "\nPARTITIONING ${device} DEVICE\n"
+printf "\n\npartitioning ${device} device\n\n"
 if ls /sys/firmware/efi/efivars >/dev/null 2>&1
 then
   sfdisk -W always /dev/${device} <<EOF
@@ -66,28 +66,25 @@ HOME_DEVICE=$(blkid --list-one --output device --match-token PARTLABEL="home")
 SWAP_DEVICE=$(blkid --list-one --output device --match-token PARTLABEL="swap")
 
 
-printf "\n\n\nNEW PARTITION TABLE:\n"
+printf "\n\nNEW PARTITION TABLE\n\n"
 sfdisk -l /dev/${device}
 
-printf "\n\n\nCREATING FILE SYSTEMS:\n"
-printf "\n\nFormating root partition at\n"
+printf "\n\nFORMATING FILE SYSTEMS\n"
+printf "\nFormating root partition\n"
 mkfs.ext4 -L "root" "$ROOT_DEVICE"
-printf "\n\nFormating root partition:\n"
+printf "\nFormating home partition:\n"
 mkfs.ext4 -L "home" "$HOME_DEVICE"
-printf "\n\nFormating swap partition:\n"
+printf "\nFormating swap partition:\n"
 mkswap -L "swap" "$SWAP_DEVICE"
-printf "\n\nEnabling swap partition:\n"
+printf "\nEnabling swap partition:\n"
 swapon "$SWAP_DEVICE"
 
-# mounting root file system at /mnt
-printf "\n\n\nMOUNTING FILE SYSTEMS:\n"
-printf "\n\nMounting \"root\" at /mnt:\n"
+# mounting file systems
+printf "\n\nMOUNTING FILE SYSTEMS:\n"
+printf "\nMounting \"root\" at /mnt:\n"
 mount "$ROOT_DEVICE" /mnt
-
 printf "\n\nMounting \"home\" at /mnt/home:\n"
-# make dir to mount home on
 mkdir /mnt/home
-# Mounting home file system
 mount "$HOME_DEVICE" /mnt/home
 
 # if UEFI
@@ -96,22 +93,22 @@ ls /sys/firmware/efi/efivars >/dev/null 2>&1 &&
   mkdir /mnt/efi && # make dir to mount efi on
   mount "$EFI_DEVICE" /mnt/efi # Mounting efi file system
 
-printf "\n\n\nDOWNLOAD AND SET MIRROR LIST\n"
+printf "\n\n\nDownloading and setting mirror list...\n"
 # Select only United Kingdom mirrors
 mirrors_url="https://archlinux.org/mirrorlist/?country=GB&protocol=https&use_mirror_status=on"
 curl -s $mirrors_url | sed -e 's/^#Server/Server/' -e '/^#/d' > /etc/pacman.d/mirrorlist
 
 # Create minimal system in /mnt by bootstrapping
-printf "Creating minimal system at /mnt\n"
+printf "\n\nCreating minimal system at /mnt\n"
 pacstrap /mnt base base-devel linux-zen linux-firmware grub
 
 # Create fstab
-printf "Creating fstab with labels:\n"
+printf "\n\nCreating fstab with labels...\n"
 genfstab -L /mnt >> /mnt/etc/fstab
 
 # Create new script inside the new root
 printf "GENERATING NEW SCRIPT FOR CHROOT\n"
-cat << EOF > /mnt/chrooth
+cat << EOF > /mnt/chroot.sh
 #!/usr/bin/env bash
 
 # Set time zone
