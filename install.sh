@@ -134,27 +134,6 @@ cat <<EOT > /etc/hosts
 ::1         localhost
 127.0.1.1   Arch_VV.localdomain Arch_VV
 EOT
-net_interfaces=(\$(find /sys/class/net -type l ! -name "lo" -printf "%f\n\n"))
-printf "Nework interfaces:\n"
-find /sys/class/net -type l ! -name "lo" -printf "%f\n\n"
-ip link set \${net_interfaces[0]} up
-cat <<EOT > /etc/systemd/network/wired-DHCP.network
-[Match]
-Name=\${net_interfaces[0]} 
-
-[Network]
-DHCP=ipv4
-EOT
-printf "\nEnabling internet service:\n"
-# Can't link at this stage. Probably because we have a working connection through the iso.
-# Remember to link after install
-# ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
-systemctl enable systemd-networkd.service
-systemctl enable systemd-resolved.service
-
-printf "\ninstalling grub:\n"
-grub-install --target=i386-pc /dev/${device}
-grub-mkconfig -o /boot/grub/grub.cfg
 
 printf "\nSet the root password\n\n"
 passwd
