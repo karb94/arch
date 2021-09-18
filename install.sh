@@ -61,10 +61,10 @@ fi
 
 # Formatting file systems
 printf "\nCreating file systems:\n"
-mkfs.ext4 -L "root" $(blkid --label "root")
-mkswap -L "swap" $(blkid --label "swap")
-swapon $(blkid --label "swap")
-mkfs.ext4 -L "home" $(blkid --label "home")
+mkfs.ext4 -L "root" $(blkid --uuid "$ROOT_UUID")
+mkfs.ext4 -L "home" $(blkid --uuid "$HOME_UUID")
+mkswap -L "swap" $(blkid --uuid "$SWAP_UUID")
+swapon $(blkid --label "$SWAP_UUID")
 
 printf "\nDisk after partition:\n"
 sfdisk -l /dev/${device}
