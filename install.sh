@@ -36,7 +36,7 @@ printf "\nUpdating the system clock:\n"
 timedatectl set-ntp true
 
 # Partition the disk
-printf "\nPartitioning ${device} disk\n"
+printf "\nPARTITIONING ${device} DEVICE\n"
 if ls /sys/firmware/efi/efivars >/dev/null 2>&1
 then
   sfdisk -W always /dev/${device} <<EOF
@@ -64,27 +64,41 @@ fi
 ROOT_DEVICE=$(blkid --list-one --output device --match-token PARTLABEL="root")
 HOME_DEVICE=$(blkid --list-one --output device --match-token PARTLABEL="home")
 SWAP_DEVICE=$(blkid --list-one --output device --match-token PARTLABEL="swap")
-printf "\nCreating file systems:\n"
-mkfs.ext4 -L "root" "$ROOT_DEVICE"
-mkfs.ext4 -L "home" "$HOME_DEVICE"
-mkswap -L "swap" "$SWAP_DEVICE"
-swapon "$SWAP_DEVICE"
 
-printf "\nDisk after partition:\n"
+
+printf "\n\n\nNEW PARTITION TABLE:\n"
 sfdisk -l /dev/${device}
 
-# Mounting root file system
-printf "\nMounting file systems:\n"
-mount /dev/${device}1 /mnt
-# Creating mounting points on /mnt
-mkdir /mnt/boot
-mkdir /mnt/home
-# Mounting boot and home file systems
-mount /dev/${device}3 /mnt/boot
-mount /dev/${device}4 /mnt/home
+printf "\n\n\nCREATING FILE SYSTEMS:\n"
+printf "\n\nFormating root partition at\n"
+mkfs.ext4 -L "root" "$ROOT_DEVICE"
+printf "\n\nFormating root partition:\n"
+mkfs.ext4 -L "home" "$HOME_DEVICE"
+printf "\n\nFormating swap partition:\n"
+mkswap -L "swap" "$SWAP_DEVICE"
+printf "\n\nEnabling swap partition:\n"
+swapon "$SWAP_DEVICE"
 
+# mounting root file system at /mnt
+printf "\n\n\nMOUNTING FILE SYSTEMS:\n"
+printf "\n\nMounting \"root\" at /mnt:\n"
+mount "$ROOT_DEVICE" /mnt
+
+printf "\n\nMounting \"home\" at /mnt/home:\n"
+# make dir to mount home on
+mkdir /mnt/home
+# Mounting home file system
+mount "$HOME_DEVICE" /mnt/home
+
+# if UEFI
+ls /sys/firmware/efi/efivars >/dev/null 2>&1 &&
+  printf "\n\nMounting \"efi\" at /mnt/efi:\n" &&
+  mkdir /mnt/efi && # make dir to mount efi on
+  mount "$EFI_DEVICE" /mnt/efi # Mounting efi file system
+
+printf "\n\n\nDOWNLOAD AND SET MIRROR LIST\n"
 # Select only United Kingdom mirrors
-mirrors_url="https://www.archlinux.org/mirrorlist/?country=GB&protocol=https&use_mirror_status=on"
+mirrors_url="https://archlinux.org/mirrorlist/?country=GB&protocol=https&use_mirror_status=on"
 curl -s $mirrors_url | sed -e 's/^#Server/Server/' -e '/^#/d' > /etc/pacman.d/mirrorlist
 
 # Create minimal system in /mnt by bootstrapping
@@ -96,8 +110,8 @@ printf "Creating fstab with labels:\n"
 genfstab -L /mnt >> /mnt/etc/fstab
 
 # Create new script inside the new root
-printf "Generating new script for chroot\n"
-cat << EOF > /mnt/chroot.sh
+printf "GENERATING NEW SCRIPT FOR CHROOT\n"
+cat << EOF > /mnt/chrooth
 #!/usr/bin/env bash
 
 # Set time zone
