@@ -73,8 +73,8 @@ sfdisk -l /dev/${device}
 printf "\nMounting file systems:\n"
 mount /dev/${device}1 /mnt
 # Creating mounting points on /mnt
-mkdir /mnt/boot >> $logfile
-mkdir /mnt/home >> $logfile
+mkdir /mnt/boot
+mkdir /mnt/home
 # Mounting boot and home file systems
 mount /dev/${device}3 /mnt/boot
 mount /dev/${device}4 /mnt/home
@@ -167,7 +167,3 @@ mv $log /mnt/$log
 curl "https://raw.githubusercontent.com/karb94/arch/master/config.sh" > /mnt/root/config.sh
 umount -R /mnt
 reboot
-
-
-# cat $logfile /mnt/install2.log > /mnt/install.log
-
