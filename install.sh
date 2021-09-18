@@ -1,5 +1,16 @@
 #!/usr/bin/env bash
 
+ROOT_UUID=4F68BCE3-E8CD-4DB1-96E7-FBCAF984B709
+SWAP_UUID=0657FD6D-A4AB-43C4-84E5-0933C84B4F4F
+HOME_UUID=933AC7E1-2EB4-4F13-B844-0E14E2AEF915
+EFI_UUID=C12A7328-F81F-11D2-BA4B-00A0C93EC93B
+BOOT_UUID=21686148-6449-6E6F-744E-656564454649
+
+ROOT_SIZE=5GiB
+SWAP_SIZE=200MiB
+EFI_SIZE=300MiB
+BOOT_SIZE=300MiB
+
 if [[ $# -eq 0 ]]
 then
     printf "Device name is required as a first argument\n"
@@ -26,24 +37,35 @@ timedatectl set-ntp true
 
 # Partition the disk
 printf "\nPartitioning ${device} disk\n"
-sfdisk -W always /dev/${device} <<EOF
+if ls /sys/firmware/efi/efivars >/dev/null 2>&1
+then
+  sfdisk -W always /dev/${device} <<EOF
 label: gpt
-name=root, size=15GiB, type=4F68BCE3-E8CD-4DB1-96E7-FBCAF984B709
-name=swap, size=2GiB, type=0657FD6D-A4AB-43C4-84E5-0933C84B4F4F
-name=efi, size=300MiB, type=C12A7328-F81F-11D2-BA4B-00A0C93EC93B
-name=home, type=933AC7E1-2EB4-4F13-B844-0E14E2AEF915
+name=root, size="$ROOT_SIZE", type="$ROOT_UUID"
+name=swap, size="$SWAP_SIZE", type="$SWAP_UUID"
+name=efi, size="$EFI_SIZE", type="$EFI_UUID"
+name=home, type="$HOME_UUID"
 EOF
-# name=boot, size=300MiB, type=21686148-6449-6E6F-744E-656564454649
+  mkfs.fat -n "efi" -F32 $(blkid --uuid "$EFI_UUID")
+else
+  # With gpt boot partition must not have a file system
+  # https://wiki.archlinux.org/title/Partitioning#Example_layouts
+  sfdisk -W always /dev/${device} <<EOF
+label: gpt
+name=root, size="$ROOT_SIZE", type="$ROOT_UUID"
+name=swap, size="$SWAP_SIZE", type="$SWAP_UUID"
+name=boot, size="$BOOT_SIZE", type="$BOOT_UUID"
+name=home, type="$HOME_UUID"
+EOF
+fi
 
-# Creating file systems
-# With gpt boot partition must not have a file system
+# Formatting file systems
 printf "\nCreating file systems:\n"
-mkfs.ext4 -L "root" /dev/${device}1
-mkswap -L "swap" /dev/${device}2
-swapon /dev/${device}2
-# mkfs.ext4 -L "boot" /dev/${device}3 >> $logfile 2>&1
-mkfs.fat -F32 /dev/${device}3
-mkfs.ext4 -L "home" /dev/${device}4
+mkfs.ext4 -L "root" $(blkid --label "root")
+mkswap -L "swap" $(blkid --label "swap")
+swapon $(blkid --label "swap")
+mkfs.ext4 -L "home" $(blkid --label "home")
+
 printf "\nDisk after partition:\n"
 sfdisk -l /dev/${device}
 
