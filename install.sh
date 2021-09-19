@@ -6,9 +6,11 @@ HOME_UUID=933AC7E1-2EB4-4F13-B844-0E14E2AEF915
 EFI_UUID=C12A7328-F81F-11D2-BA4B-00A0C93EC93B
 BOOT_UUID=21686148-6449-6E6F-744E-656564454649
 
-ROOT_SIZE=5GiB
+ROOT_SIZE=7GiB
 SWAP_SIZE=200MiB
+# for UEFI BIOS
 EFI_SIZE=300MiB
+# for non-UEFI BIOS
 BOOT_SIZE=300MiB
 
 HOSTNAME=Arch_VV
@@ -119,6 +121,11 @@ EOF
 127.0.1.1   "$HOSTNAME".localdomain "$HOSTNAME"
 EOF
 
+  # Enable systemd-networkd as network manager
+  systemctl enable systemd-networkd.service
+  # Enable systemd-networkd as  systemd-resolved as DNS resolver
+  systemctl enable systemd-resolved.service
+
   # GRUB configuration
   if [ "$BIOS_TYPE" == "uefi" ]
   then
@@ -144,5 +151,5 @@ elapsed=$(($(date +%s)-$start))
 mv $log /mnt/$log
 
 curl "https://raw.githubusercontent.com/karb94/arch/master/config.sh" > /mnt/root/config.sh
-# umount -R /mnt
-# reboot
+umount -R /mnt
+reboot
