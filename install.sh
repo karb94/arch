@@ -120,7 +120,8 @@ EOF
 EOT
 
   # GRUB configuration
-  if [ "$BIOS_TYPE" == "uefi" ] then;
+  if [ "$BIOS_TYPE" == "uefi" ]
+  then
     arch-chroot /mnt grub-install --target=i386-pc /dev/${device}
   else
     arch-chroot /mnt grub-install \
