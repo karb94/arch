@@ -144,5 +144,5 @@ elapsed=$(($(date +%s)-$start))
 mv $log /mnt/$log
 
 curl "https://raw.githubusercontent.com/karb94/arch/master/config.sh" > /mnt/root/config.sh
-umount -R /mnt
+# umount -R /mnt
 # reboot
