@@ -122,13 +122,13 @@ EOF
   # GRUB configuration
   if [ "$BIOS_TYPE" == "uefi" ]
   then
-    arch-chroot /mnt grub-install --target=i386-pc /dev/${device}
-  else
     arch-chroot /mnt grub-install \
       --target=x86_64-efi \
       --efi-directory=/efi \
       --boot-directory=/efi \
       --bootloader-id=GRUB
+  else
+    arch-chroot /mnt grub-install --target=i386-pc /dev/"${device}"
   fi
   arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 
