@@ -100,7 +100,7 @@ curl -s $mirrors_url | sed -e 's/^#Server/Server/' -e '/^#/d' > /etc/pacman.d/mi
 
 # Create minimal system in /mnt by bootstrapping
 printf "\n\nCreating minimal system at /mnt\n"
-pacstrap /mnt base base-devel linux-zen linux-firmware grub
+pacstrap /mnt base linux-zen linux-firmware grub
 
 # Create fstab
 printf "\n\nCreating fstab with labels...\n"
@@ -128,11 +128,15 @@ localectl set-locale LANG=en_GB.UTF-8
 printf "Arch_VV" > /etc/hostname
 
 # Network configuration
-printf "\nNetwork configuration:\n"
+printf "\nConfiguring network...\n"
 cat <<EOT > /etc/hosts
 127.0.0.1   localhost
 ::1         localhost
 127.0.1.1   Arch_VV.localdomain Arch_VV
+
+printf "\ninstalling grub:\n"
+grub-install --target=i386-pc /dev/${device}
+grub-mkconfig -o /boot/grub/grub.cfg
 EOT
 
 printf "\nSet the root password\n\n"
@@ -159,5 +163,5 @@ printf "Installation time: $(($elapsed / 60)) min $(($elapsed % 60))s\n" >> $log
 mv $log /mnt/$log
 
 curl "https://raw.githubusercontent.com/karb94/arch/master/config.sh" > /mnt/root/config.sh
-# umount -R /mnt
+umount -R /mnt
 # reboot
