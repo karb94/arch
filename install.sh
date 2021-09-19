@@ -11,6 +11,11 @@ SWAP_SIZE=200MiB
 EFI_SIZE=300MiB
 BOOT_SIZE=300MiB
 
+HOSTNAME=Arch_VV
+
+# exit when any command fails
+set -e
+
 if [[ $# -eq 0 ]]
 then
     printf "Device name is required as a first argument\n"
@@ -18,8 +23,12 @@ then
     exit 0
 fi
 
-# exit when any command fails
-set -e
+if [ -d /sys/firmware/efi ]; then
+  BIOS_TYPE="uefi"
+else
+  BIOS_TYPE="bios"
+fi
+
 
 # keep track of the last executed command
 trap 'last_command=$current_command; current_command=$BASH_COMMAND' DEBUG
@@ -31,134 +40,105 @@ log="install.log"
 
 
 arch_install () {
-# Update the system clock
-printf "\nUpdating the system clock:\n"
-timedatectl set-ntp true
 
-# Partition the disk
-printf "\n\npartitioning ${device} device...\n\n"
-if ls /sys/firmware/efi/efivars >/dev/null 2>&1
-then
-  sfdisk -W always /dev/${device} <<EOF
+  # update the system clock
+  timedatectl set-ntp true
+
+  # partition the disk
+  if [ "$BIOS_TYPE" == "uefi" ]
+  then
+    sfdisk -W always /dev/${device} <<EOF
 label: gpt
 name=root, size="$ROOT_SIZE", type="$ROOT_UUID"
 name=swap, size="$SWAP_SIZE", type="$SWAP_UUID"
 name=efi, size="$EFI_SIZE", type="$EFI_UUID"
 name=home, type="$HOME_UUID"
 EOF
-  EFI_DEVICE=$(blkid --list-one --output device --match-token PARTLABEL="home")
-  mkfs.fat -n "efi" -F32 "$EFI_DEVICE"
-else
-  # With gpt boot partition must not have a file system
-  # https://wiki.archlinux.org/title/Partitioning#Example_layouts
-  sfdisk -W always /dev/${device} <<EOF
+    EFI_DEVICE=$(blkid --list-one --output device --match-token PARTLABEL="home")
+    mkfs.fat -n "efi" -F32 "$EFI_DEVICE"
+  else
+    # With gpt boot partition must not have a file system
+    # https://wiki.archlinux.org/title/Partitioning#Example_layouts
+    sfdisk -W always /dev/${device} <<EOF
 label: gpt
 name=root, size="$ROOT_SIZE", type="$ROOT_UUID"
 name=swap, size="$SWAP_SIZE", type="$SWAP_UUID"
 name=boot, size="$BOOT_SIZE", type="$BOOT_UUID"
 name=home, type="$HOME_UUID"
 EOF
-fi
+  fi
 
-# Formatting file systems
-ROOT_DEVICE=$(blkid --list-one --output device --match-token PARTLABEL="root")
-HOME_DEVICE=$(blkid --list-one --output device --match-token PARTLABEL="home")
-SWAP_DEVICE=$(blkid --list-one --output device --match-token PARTLABEL="swap")
+  # formatting file systems
+  ROOT_DEVICE=$(blkid --list-one --output device --match-token PARTLABEL="root")
+  HOME_DEVICE=$(blkid --list-one --output device --match-token PARTLABEL="home")
+  SWAP_DEVICE=$(blkid --list-one --output device --match-token PARTLABEL="swap")
 
+  sfdisk -l /dev/${device}
 
-printf "\n\nNEW PARTITION TABLE\n\n"
-sfdisk -l /dev/${device}
+  mkfs.ext4 -L "root" "$ROOT_DEVICE"
+  mkfs.ext4 -L "home" "$HOME_DEVICE"
+  mkswap -L "swap" "$SWAP_DEVICE"
+  swapon "$SWAP_DEVICE"
 
-printf "\n\nFORMATING FILE SYSTEMS\n"
-printf "\nFormating root partition:\n"
-mkfs.ext4 -L "root" "$ROOT_DEVICE"
-printf "\nFormating home partition:\n"
-mkfs.ext4 -L "home" "$HOME_DEVICE"
-printf "\nFormating swap partition:\n"
-mkswap -L "swap" "$SWAP_DEVICE"
-printf "\nEnabling swap partition:\n"
-swapon "$SWAP_DEVICE"
+  # mounting file systems
+  mount "$ROOT_DEVICE" /mnt
+  mkdir /mnt/home
+  mount "$HOME_DEVICE" /mnt/home
 
-# mounting file systems
-printf "\n\nMOUNTING FILE SYSTEMS:\n"
-printf "\nMounting \"root\" at /mnt...\n"
-mount "$ROOT_DEVICE" /mnt
-printf "\nMounting \"home\" at /mnt/home...:\n"
-mkdir /mnt/home
-mount "$HOME_DEVICE" /mnt/home
+  # if UEFI BIOS mount the efi partition
+  [ "$BIOS_TYPE" == "uefi" ] &&
+    mkdir /mnt/efi && # make dir to mount efi on
+    mount "$EFI_DEVICE" /mnt/efi # Mounting efi file system
 
-# if UEFI
-ls /sys/firmware/efi/efivars >/dev/null 2>&1 &&
-  printf "\nMounting \"efi\" at /mnt/efi:\n" &&
-  mkdir /mnt/efi && # make dir to mount efi on
-  mount "$EFI_DEVICE" /mnt/efi # Mounting efi file system
+  # select only united kingdom mirrors
+  mirrors_url="https://archlinux.org/mirrorlist/?country=GB&protocol=https&use_mirror_status=on"
+  curl -s $mirrors_url | sed -e 's/^#Server/Server/' -e '/^#/d' > /etc/pacman.d/mirrorlist
 
-printf "\n\n\nDownloading and setting mirror list...\n"
-# Select only United Kingdom mirrors
-mirrors_url="https://archlinux.org/mirrorlist/?country=GB&protocol=https&use_mirror_status=on"
-curl -s $mirrors_url | sed -e 's/^#Server/Server/' -e '/^#/d' > /etc/pacman.d/mirrorlist
+  # create minimal system in /mnt by bootstrapping
+  pacstrap /mnt base linux-zen linux-firmware grub
 
-# Create minimal system in /mnt by bootstrapping
-printf "\n\nCreating minimal system at /mnt\n"
-pacstrap /mnt base linux-zen linux-firmware grub
+  # create fstab
+  genfstab -L /mnt >> /mnt/etc/fstab
 
-# Create fstab
-printf "\n\nCreating fstab with labels...\n"
-genfstab -L /mnt >> /mnt/etc/fstab
+  # set time zone
+  arch-chroot /mnt ln -sf /usr/share/zoneinfo/GB /etc/localtime
+  arch-chroot /mnt hwclock --systohc
 
-# Create new script inside the new root
-printf "GENERATING NEW SCRIPT FOR CHROOT\n"
-cat << EOF > /mnt/chroot.sh
-#!/usr/bin/env bash
+  # set locale
+  arch-chroot /mnt sed -i '/en_GB.UTF-8/s/#//' /etc/locale.gen
+  arch-chroot /mnt sed -i '/en_US.UTF-8/s/#//' /etc/locale.gen
+  arch-chroot /mnt sed -i '/es_ES.UTF-8/s/#//' /etc/locale.gen
+  arch-chroot /mnt sed -i '/ca_ES.UTF-8/s/#//' /etc/locale.gen
+  arch-chroot /mnt locale-gen
+  arch-chroot /mnt localectl set-locale LANG=en_GB.UTF-8
 
-# Set time zone
-printf "\nSetting time configuration...\n"
-ln -sf /usr/share/zoneinfo/GB /etc/localtime
-hwclock --systohc
-
-# Set location
-printf "\nLocation configuration:\n"
-sed -i '/en_GB.UTF-8/s/#//' /etc/locale.gen
-sed -i '/en_US.UTF-8/s/#//' /etc/locale.gen
-sed -i '/es_ES.UTF-8/s/#//' /etc/locale.gen
-sed -i '/ca_ES.UTF-8/s/#//' /etc/locale.gen
-locale-gen
-localectl set-locale LANG=en_GB.UTF-8
-
-printf "Arch_VV" > /etc/hostname
-
-# Network configuration
-printf "\nConfiguring network...\n"
-cat <<EOT > /etc/hosts
+  # network configuration
+  arch-chroot /mnt cat <<EOT > /etc/hosts
 127.0.0.1   localhost
 ::1         localhost
-127.0.1.1   Arch_VV.localdomain Arch_VV
-
-printf "\ninstalling grub:\n"
-grub-install --target=i386-pc /dev/${device}
-grub-mkconfig -o /boot/grub/grub.cfg
+127.0.1.1   "$HOSTNAME".localdomain "$HOSTNAME"
 EOT
 
-printf "\nSet the root password\n\n"
-passwd
+  # GRUB configuration
+  if [ "$BIOS_TYPE" == "uefi" ] then;
+    arch-chroot /mnt grub-install --target=i386-pc /dev/${device}
+  else
+    arch-chroot /mnt grub-install \
+      --target=x86_64-efi \
+      --efi-directory=/efi \
+      --boot-directory=/efi \
+      --bootloader-id=GRUB
+  fi
+  arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 
-exit
-EOF
-chmod u+x /mnt/chroot.sh
+  # set root password
+  arch-chroot /mnt passwd
 
-# Change root to /mnt
-printf "Changing root to /mnt...\n"
-arch-chroot /mnt /chroot.sh
-
-rm /mnt/chroot.sh
 }
 
 start=$(date +%s)
-printf "Start time $(date -u)\n" > $log
 arch_install 2>&1 | tee -a $log
-printf "\nEnd time $(date -u)\n" >> $log
 elapsed=$(($(date +%s)-$start))
-printf "Installation time: $(($elapsed / 60)) min $(($elapsed % 60))s\n" >> $log
 
 mv $log /mnt/$log
 
