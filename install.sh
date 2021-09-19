@@ -113,24 +113,24 @@ EOF
   arch-chroot /mnt localectl set-locale LANG=en_GB.UTF-8
 
   # network configuration
-  arch-chroot /mnt cat <<EOT > /etc/hosts
+  arch-chroot /mnt cat <<EOF > /etc/hosts
 127.0.0.1   localhost
 ::1         localhost
 127.0.1.1   "$HOSTNAME".localdomain "$HOSTNAME"
-EOT
+EOF
 
   # GRUB configuration
-  if [ "$BIOS_TYPE" == "uefi" ]
-  then
-    arch-chroot /mnt grub-install --target=i386-pc /dev/${device}
-  else
-    arch-chroot /mnt grub-install \
-      --target=x86_64-efi \
-      --efi-directory=/efi \
-      --boot-directory=/efi \
-      --bootloader-id=GRUB
-  fi
-  arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
+  # if [ "$BIOS_TYPE" == "uefi" ]
+  # then
+  #   arch-chroot /mnt grub-install --target=i386-pc /dev/${device}
+  # else
+  #   arch-chroot /mnt grub-install \
+  #     --target=x86_64-efi \
+  #     --efi-directory=/efi \
+  #     --boot-directory=/efi \
+  #     --bootloader-id=GRUB
+  # fi
+  # arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 
   # set root password
   arch-chroot /mnt passwd
