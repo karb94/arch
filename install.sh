@@ -123,15 +123,14 @@ EOF
 
   # enable network interface
   net_interfaces=$(arch-chroot /mnt \
-    find /sys/class/net -type l ! -name "lo" -printf "%f\n") |
-    head -n1
+    find /sys/class/net -type l ! -name "lo" -printf "%f\n" |
+    head -n1)
   ip link set "$net_interfaces" up
   # enable systemd-networkd as network manager
   arch-chroot /mnt systemctl enable systemd-networkd.service
   # enable systemd-networkd as  systemd-resolved as DNS resolver
   arch-chroot /mnt systemctl enable systemd-resolved.service
 
-  printf "\n\nGRUB HERE\n\n\n"
   # GRUB configuration
   if [ "$BIOS_TYPE" == "uefi" ]
   then
