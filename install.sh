@@ -121,11 +121,6 @@ EOF
 127.0.1.1   "$HOSTNAME".localdomain "$HOSTNAME"
 EOF
 
-  # enable network interface
-  net_interfaces=$(arch-chroot /mnt \
-    find /sys/class/net -type l ! -name "lo" -printf "%f\n" |
-    head -n1)
-  ip link set "$net_interfaces" up
   # enable systemd-networkd as network manager
   arch-chroot /mnt systemctl enable systemd-networkd.service
   # enable systemd-networkd as  systemd-resolved as DNS resolver

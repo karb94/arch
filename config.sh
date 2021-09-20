@@ -11,6 +11,13 @@ trap 'last_command=$current_command; current_command=$BASH_COMMAND' DEBUG
 # echo an error message before exiting
 trap 'echo "\"${last_command}\" command filed with exit code $?."' EXIT
 
+# enable network interface
+net_interfaces=$(arch-chroot /mnt \
+  find /sys/class/net -type l ! -name "lo" -printf "%f\n" |
+  head -n1)
+
+ip link set "$net_interfaces" up
+
 # Symlink DNS configuration (for networkd network manager)
 # ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
 
