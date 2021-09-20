@@ -121,10 +121,15 @@ EOF
 127.0.1.1   "$HOSTNAME".localdomain "$HOSTNAME"
 EOF
 
-  # Enable systemd-networkd as network manager
-  systemctl enable systemd-networkd.service
-  # Enable systemd-networkd as  systemd-resolved as DNS resolver
-  systemctl enable systemd-resolved.service
+  # enable network interface
+  net_interfaces=$(arch-chroot /mnt \
+    find /sys/class/net -type l ! -name "lo" -printf "%f\n") |
+    head -n1
+  ip link set "$net_interfaces" up
+  # enable systemd-networkd as network manager
+  arch-chroot /mnt systemctl enable systemd-networkd.service
+  # enable systemd-networkd as  systemd-resolved as DNS resolver
+  arch-chroot /mnt systemctl enable systemd-resolved.service
 
   # GRUB configuration
   if [ "$BIOS_TYPE" == "uefi" ]
@@ -137,6 +142,7 @@ EOF
   else
     arch-chroot /mnt grub-install --target=i386-pc /dev/"${device}"
   fi
+  # generate GRUB config
   arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 
   # set root password

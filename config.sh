@@ -12,10 +12,11 @@ trap 'last_command=$current_command; current_command=$BASH_COMMAND' DEBUG
 trap 'echo "\"${last_command}\" command filed with exit code $?."' EXIT
 
 # Symlink DNS configuration (for networkd network manager)
-ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
+# ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
 
 pacman -Syyu
-pacman -S --noconfirm git man-db man-pages xorg-server xorg-init nodejs npm i3-gaps python
+pacman -S --noconfirm - < packages
+
 
 # Create the group "sudo"
 groupadd sudo
