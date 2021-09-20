@@ -131,6 +131,7 @@ EOF
   # enable systemd-networkd as  systemd-resolved as DNS resolver
   arch-chroot /mnt systemctl enable systemd-resolved.service
 
+  printf "\n\nGRUB HERE\n\n\n"
   # GRUB configuration
   if [ "$BIOS_TYPE" == "uefi" ]
   then
