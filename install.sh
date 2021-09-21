@@ -122,9 +122,7 @@ EOF
 EOF
 
   # enable systemd-networkd as network manager
-  arch-chroot /mnt systemctl enable systemd-networkd.service
-  # enable systemd-networkd as  systemd-resolved as DNS resolver
-  arch-chroot /mnt systemctl enable systemd-resolved.service
+  arch-chroot /mnt systemctl enable NetworkManager.service
 
   # GRUB configuration
   if [ "$BIOS_TYPE" == "uefi" ]
@@ -154,9 +152,6 @@ arch_install 2>&1 | tee -a $log
 elapsed=$(($(date +%s)-$start))
 
 mv $log /mnt/$log
-
-# packages_url=https://raw.githubusercontent.com/karb94/arch/master/packages
-# curl "$packages_url" > /mnt/root/init.sh
 
 # umount -R /mnt
 # reboot
