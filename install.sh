@@ -153,5 +153,5 @@ elapsed=$(($(date +%s)-$start))
 
 mv $log /mnt/$log
 
-# umount -R /mnt
-# reboot
+umount -R /mnt
+reboot
