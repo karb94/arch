@@ -97,7 +97,7 @@ EOF
   curl -s $mirrors_url | sed -e 's/^#Server/Server/' -e '/^#/d' > /etc/pacman.d/mirrorlist
 
   # create minimal system in /mnt by bootstrapping
-  pacstrap /mnt base linux-zen linux-firmware grub
+  pacstrap /mnt base linux-zen linux-firmware grub networkmanager curl 
 
   # create fstab
   genfstab -L /mnt >> /mnt/etc/fstab
@@ -143,6 +143,10 @@ EOF
   # set root password
   arch-chroot /mnt passwd
 
+  init_url=https://raw.githubusercontent.com/karb94/arch/master/config.sh
+  arch-chroot /mnt curl "$init_url" > /mnt/etc/systemd/system/first-boot.sh
+  arch-chroot /mnt systemctl enable first-boot
+
 }
 
 start=$(date +%s)
@@ -151,6 +155,8 @@ elapsed=$(($(date +%s)-$start))
 
 mv $log /mnt/$log
 
-curl "https://raw.githubusercontent.com/karb94/arch/master/config.sh" > /mnt/root/config.sh
-umount -R /mnt
-reboot
+# packages_url=https://raw.githubusercontent.com/karb94/arch/master/packages
+# curl "$packages_url" > /mnt/root/init.sh
+
+# umount -R /mnt
+# reboot
