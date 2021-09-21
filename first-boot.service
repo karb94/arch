@@ -5,7 +5,7 @@ After=Network.target network-online.target
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/curl https://raw.githubusercontent.com/karb94/arch/master/first_boot.sh
+ExecStart=/usr/bin/bash -c <(curl https://raw.githubusercontent.com/karb94/arch/master/first_boot.sh)
 StandardOutput=journal
 
 [Install]

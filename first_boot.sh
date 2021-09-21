@@ -12,11 +12,11 @@ trap 'last_command=$current_command; current_command=$BASH_COMMAND' DEBUG
 trap 'echo "\"${last_command}\" command filed with exit code $?."' EXIT
 
 # get network interface name
-net_interfaces=$(arch-chroot /mnt \
-  find /sys/class/net -type l ! -name "lo" -printf "%f\n" |
-  head -n1)
-# enable network interface
-ip link set "$net_interfaces" up
+# net_interfaces=$(arch-chroot /mnt \
+#   find /sys/class/net -type l ! -name "lo" -printf "%f\n" |
+#   head -n1)
+# # enable network interface
+# ip link set "$net_interfaces" up
 
 # update system
 pacman -Syyu
