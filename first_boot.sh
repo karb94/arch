@@ -23,3 +23,15 @@ pacman -Syyu
 # install packages
 packages_url=https://raw.githubusercontent.com/karb94/arch/master/packages
 curl "$packages_url" | pacman -S --needed --noconfirm -
+
+cat <<EOF >> /etc/pacman.conf
+
+[aur]
+SigLevel = Optional TrustAll
+Server = file:///var/cache/pacman/aurpkg
+EOF
+
+sed -in '/\[options\]/a \
+    CacheDir = /var/cache/pacman/pkg\
+    CacheDir = /var/cache/pacman/custom\
+    CleanMethod = KeepCurrent' /etc/pacman.conf
