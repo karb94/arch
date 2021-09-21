@@ -1,9 +1,12 @@
 [Unit]
 Description=First boot configuration script
 Requires=Network.target
-After=Network.target
+After=Network.target network-online.target
 
 [Service]
 Type=oneshot
 ExecStart=/usr/bin/curl https://raw.githubusercontent.com/karb94/arch/master/first_boot.sh
 StandardOutput=journal
+
+[Install]
+WantedBy=multi-user.target
