@@ -143,8 +143,8 @@ EOF
   # set root password
   arch-chroot /mnt passwd
 
-  first-boot_url=https://raw.githubusercontent.com/karb94/arch/master/first-boot.service
-  curl "$init_url" > /mnt/etc/systemd/system/first-boot.service
+  first_boot_url=https://raw.githubusercontent.com/karb94/arch/master/first-boot.service
+  curl "$first_boot_url" > /mnt/etc/systemd/system/first-boot.service
   arch-chroot /mnt systemctl enable first-boot.service
 
 }
