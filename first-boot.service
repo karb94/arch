@@ -1,12 +1,12 @@
 [Unit]
 Description=First boot configuration script
+wants=network.target network-online.target
 After=network.target network-online.target NetworkManager-wait-online.service
 
 [Service]
 Type=oneshot
-ExecStart=/bin/sh -c "/usr/bin/bash <(curl -s https://raw.githubusercontent.com/karb94/arch/master/first_boot.sh)"
+ExecStart=/bin/sh -c "/usr/bin/sleep 10; /usr/bin/bash <(curl -s https://raw.githubusercontent.com/karb94/arch/master/first_boot.sh)"
 StandardOutput=journal
-User=root
 
 [Install]
 WantedBy=multi-user.target
