@@ -144,8 +144,8 @@ EOF
   arch-chroot /mnt passwd
 
   first_boot_url=https://raw.githubusercontent.com/karb94/arch/master/first_boot.sh
-  curl "$first_boot_url" > /mnt/etc/systemd/system/00-first-boot.service
-  arch-chroot /mnt systemctl enable first-boot.service
+  curl "$first_boot_url" > /mnt/etc/NetworkManager/dispatcher.d/10-first_boot.sh
+  arch-chroot /mnt chmod +x /etc/NetworkManager/dispatcher.d/10-first_boot.sh
 
 }
 
