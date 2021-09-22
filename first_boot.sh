@@ -20,7 +20,9 @@ trap 'echo "\"${last_command}\" command filed with exit code $?."' EXIT
 
 # update system
 pacman -Syyu
-pacman -S --needed --noconfirm fakeroot binutils
+
+# install aurutils dependencies
+pacman -S --asdeps --needed --noconfirm fakeroot binutils
 # install packages
 packages_url=https://raw.githubusercontent.com/karb94/arch/master/packages
 curl "$packages_url" | pacman -S --needed --noconfirm -
@@ -33,6 +35,10 @@ Server = file:///var/cache/pacman/aurpkg
 EOF
 
 sed -in '/\[options\]/a \
-    CacheDir = /var/cache/pacman/pkg\
-    CacheDir = /var/cache/pacman/custom\
-    CleanMethod = KeepCurrent' /etc/pacman.conf
+CacheDir = /var/cache/pacman/pkg\
+CacheDir = /var/cache/pacman/custom\
+CleanMethod = KeepCurrent' /etc/pacman.conf
+
+# clean up
+# systemctl disable first-boot.service
+# rm /etc/systemd/system/first-boot.service"
