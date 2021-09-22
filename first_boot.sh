@@ -2,8 +2,14 @@
 
 interface=$1
 event=$2
+echo "interface: $interface" >> /root/dispatcher.log
+echo "event: $event" >> /root/dispatcher.log
+echo "CONNECTION_ID: $CONNECTION_ID" >> /root/dispatcher.log
+echo "DEVICE_IP_IFACE: $DEVICE_IP_IFACE" >> /root/dispatcher.log
+echo "DEVICE_IP_IFACE: $DEVICE_IP_IFACE" >> /root/dispatcher.log
+echo "CONNECTIVITY_STATE: $CONNECTIVITY_STATE" >> /root/dispatcher.log
 # run the script only when online connection is active (interface is up)
-[ "$interface" == "lo" ] || [ "$event" != "up" ] && return 0
+[ "$event" == "up" ] && return 0
 
 # read -p "Enter fullname: " username
 username=carles
