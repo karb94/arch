@@ -20,6 +20,7 @@ trap 'echo "\"${last_command}\" command filed with exit code $?."' EXIT
 
 # update system
 pacman -Syyu
+pacman -S --needed --noconfirm fakeroot binutils
 # install packages
 packages_url=https://raw.githubusercontent.com/karb94/arch/master/packages
 curl "$packages_url" | pacman -S --needed --noconfirm -

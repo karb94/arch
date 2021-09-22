@@ -139,6 +139,7 @@ EOF
   arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 
   # set root password
+  printf "\n\nSet root password\n"
   arch-chroot /mnt passwd
 
   first_boot_url=https://raw.githubusercontent.com/karb94/arch/master/first-boot.service
