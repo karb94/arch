@@ -1,7 +1,6 @@
 [Unit]
 Description=First boot configuration script
-Requires=Network.target
-After=network.target network-online.target
+After=network.target network-online.target NetworkManager-wait-online.service
 
 [Service]
 Type=oneshot
