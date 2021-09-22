@@ -123,6 +123,7 @@ EOF
 
   # enable systemd-networkd as network manager
   arch-chroot /mnt systemctl enable NetworkManager.service
+  arch-chroot /mnt systemctl enable NetworkManager-dispatcher.service
 
   # GRUB configuration
   if [ "$BIOS_TYPE" == "uefi" ]
@@ -142,8 +143,8 @@ EOF
   printf "\n\nSet root password\n"
   arch-chroot /mnt passwd
 
-  first_boot_url=https://raw.githubusercontent.com/karb94/arch/master/first-boot.service
-  curl "$first_boot_url" > /mnt/etc/systemd/system/first-boot.service
+  first_boot_url=https://raw.githubusercontent.com/karb94/arch/master/first_boot.sh
+  curl "$first_boot_url" > /mnt/etc/systemd/system/00-first-boot.service
   arch-chroot /mnt systemctl enable first-boot.service
 
 }
@@ -151,8 +152,8 @@ EOF
 start=$(date +%s)
 arch_install 2>&1 | tee -a $log
 elapsed=$(($(date +%s)-$start))
-
+unset -e
 mv $log /mnt/$log
 
-umount -R /mnt
+mount -R /mnt
 reboot
