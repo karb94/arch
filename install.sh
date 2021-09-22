@@ -152,7 +152,7 @@ EOF
 start=$(date +%s)
 arch_install 2>&1 | tee -a $log
 elapsed=$(($(date +%s)-$start))
-unset -e
+set +e
 mv $log /mnt/$log
 
 mount -R /mnt
