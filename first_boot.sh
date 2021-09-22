@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 
-interface=$1
-event=$2
-echo "interface: $interface" >> /root/dispatcher.log
-echo "event: $event" >> /root/dispatcher.log
-echo "CONNECTION_ID: $CONNECTION_ID" >> /root/dispatcher.log
-echo "DEVICE_IP_IFACE: $DEVICE_IP_IFACE" >> /root/dispatcher.log
-echo "DEVICE_IP_IFACE: $DEVICE_IP_IFACE" >> /root/dispatcher.log
-echo "CONNECTIVITY_STATE: $CONNECTIVITY_STATE" >> /root/dispatcher.log
+# interface=$1
+# event=$2
+# echo "interface: $interface" >> /root/dispatcher.log
+# echo "event: $event" >> /root/dispatcher.log
+# echo "CONNECTION_ID: $CONNECTION_ID" >> /root/dispatcher.log
+# echo "DEVICE_IP_IFACE: $DEVICE_IP_IFACE" >> /root/dispatcher.log
+# echo "DEVICE_IP_IFACE: $DEVICE_IP_IFACE" >> /root/dispatcher.log
+# echo "CONNECTIVITY_STATE: $CONNECTIVITY_STATE" >> /root/dispatcher.log
 # run the script only when online connection is active (interface is up)
-[ "$event" == "up" ] && return 0
+[ "$CONNECTIVITY_STATE" != "FULL" ] && return 0
 
 # read -p "Enter fullname: " username
 username=carles
@@ -31,7 +31,7 @@ main () {
   # ip link set "$net_interfaces" up
 
   # update system
-  pacman -Syyu
+  pacman -Syyu --nocofirm
 
   # install aurutils dependencies
   pacman -S --asdeps --needed --noconfirm fakeroot binutils
@@ -39,7 +39,7 @@ main () {
   packages_url=https://raw.githubusercontent.com/karb94/arch/master/packages
   curl "$packages_url" | pacman -S --needed --noconfirm -
 
-  cat <<EOF >> /etc/pacman.conf
+  # cat <<EOF >> /etc/pacman.conf
 
   # [aur]
   # SigLevel = Optional TrustAll
