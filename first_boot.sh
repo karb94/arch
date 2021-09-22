@@ -9,7 +9,7 @@
 # echo "DEVICE_IP_IFACE: $DEVICE_IP_IFACE" >> /root/dispatcher.log
 # echo "CONNECTIVITY_STATE: $CONNECTIVITY_STATE" >> /root/dispatcher.log
 # run the script only when online connection is active (interface is up)
-[ "$CONNECTIVITY_STATE" != "FULL" ] && return 0
+[ "$CONNECTIVITY_STATE" != "FULL" ] && exit 0
 
 # read -p "Enter fullname: " username
 username=carles
@@ -31,7 +31,7 @@ main () {
   # ip link set "$net_interfaces" up
 
   # update system
-  pacman -Syyu --nocofirm
+  pacman -Syu
 
   # install aurutils dependencies
   pacman -S --asdeps --needed --noconfirm fakeroot binutils
@@ -39,6 +39,12 @@ main () {
   packages_url=https://raw.githubusercontent.com/karb94/arch/master/packages
   curl "$packages_url" | pacman -S --needed --noconfirm -
 
+  aurutils_url="https://aur.archlinux.org/cgit/aur.git/snapshot/aurutils.tar.gz"
+  curl $aurutils_url | tar xvz --directory /tmp/
+
+  cat <<EOF >> /etc/pacman.conf
+permit nopass root cmd
+EOF
   # cat <<EOF >> /etc/pacman.conf
 
   # [aur]
@@ -56,4 +62,4 @@ main () {
   # rm /etc/systemd/system/first-boot.service"
 }
 
-main > /root/dispatcher.log
+main >> /root/dispatcher.log
