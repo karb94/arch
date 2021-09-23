@@ -34,7 +34,7 @@ main () {
   pacman -Syu
 
   # install aurutils dependencies
-  pacman -S --asdeps --needed --noconfirm fakeroot binutils
+  pacman -S --asdeps --needed --noconfirm fakeroot binutils signify pacutils
   # install packages
   packages_url=https://raw.githubusercontent.com/karb94/arch/master/packages
   curl "$packages_url" | pacman -S --needed --noconfirm -
@@ -46,6 +46,9 @@ EOF
   aurutils_url="https://aur.archlinux.org/cgit/aur.git/snapshot/aurutils.tar.gz"
   curl $aurutils_url | tar xvz --directory /tmp/
   chmod -R 007 /tmp/aurutils
+  cd /tmp/aurutils
+  doas -u nobody makepkg
+  pacman -U --noconfirm
 
   # cat <<EOF >> /etc/pacman.conf
 
