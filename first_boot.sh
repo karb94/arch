@@ -96,21 +96,20 @@ permit nopass :wheel as root cmd pacman args -Syu
 permit nopass :wheel as root cmd pacman args -S
 EOF
 
-  # cat <<EOF >> /etc/pacman.conf
+  cat <<EOF >> /etc/pacman.conf
+[aur]
+SigLevel = Optional TrustAll
+Server = file:///var/cache/pacman/aur_pkg
+EOF
 
-  # [aur]
-  # SigLevel = Optional TrustAll
-  # Server = file:///var/cache/pacman/aurpkg
-  # EOF
+sed -in '/\[options\]/a \
+CacheDir = /var/cache/pacman/pkg\
+CacheDir = /var/cache/pacman/aur_pkg\
+CleanMethod = KeepCurrent' /etc/pacman.conf
 
-  # sed -in '/\[options\]/a \
-  # CacheDir = /var/cache/pacman/pkg\
-  # CacheDir = /var/cache/pacman/custom\
-  # CleanMethod = KeepCurrent' /etc/pacman.conf
-
-  # clean up
-  # systemctl disable first-boot.service
-  # rm /etc/systemd/system/first-boot.service"
+clean up
+systemctl disable first-boot.service
+rm /etc/systemd/system/first-boot.service"
 }
 
 main >> /root/dispatcher.log
