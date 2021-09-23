@@ -38,7 +38,9 @@ main () {
   packages_url=https://raw.githubusercontent.com/karb94/arch/master/packages
   curl "$packages_url" | pacman -S --needed --noconfirm -
 
-  cat <<EOF > /etc/pacman.d/hooks/remove_old_cache.hook
+  mkdir -pv hook
+  # add pacman hooks to remove excess cache
+  tee /etc/pacman.d/hooks/remove_old_cache.hook <<EOF
 [Trigger]
 Operation = Install
 Operation = Upgrade
@@ -52,7 +54,7 @@ Exec = /usr/bin/paccache -rvk2
 permit nopass root as nobody cmd makepkg
 EOF
 
-  cat <<EOF > /etc/pacman.d/hooks/remove_old_cache.hook
+  tee /etc/pacman.d/hooks/remove_old_cache.hook <<EOF
 [Trigger]
 Operation = Remove
 Type = Package
@@ -65,12 +67,13 @@ Exec = /usr/bin/paccache -rvuk0
 permit nopass root as nobody cmd makepkg
 EOF
 
-  cat <<EOF > /etc/doas.conf
+  tee /etc/doas.conf <<EOF
 permit nopass root as nobody cmd makepkg
 EOF
 
   # AURUTILS INSTALLATION
   # install aurutils dependencies
+  printf "\n\nAFTER AURUTILS DEPS\n\n"
   pacman -S --asdeps --needed --noconfirm fakeroot binutils signify pacutils
   printf "\n\nAFTER AURUTILS DEPS\n\n"
   # download and extract package
@@ -89,7 +92,7 @@ EOF
   pacman -Rsn --noconfirm $(pacman -Qqtd)
   pacman -Sc --noconfirm
 
-  cat <<EOF > /etc/doas.conf
+  tee /etc/doas.conf <<EOF
 permit :wheel as root
 permit nopass :wheel as root cmd pacman args -Syu
 permit nopass :wheel as root cmd pacman args -S
