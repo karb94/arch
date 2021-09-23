@@ -72,6 +72,7 @@ EOF
   # AURUTILS INSTALLATION
   # install aurutils dependencies
   pacman -S --asdeps --needed --noconfirm fakeroot binutils signify pacutils
+  printf "\n\nAFTER AURUTILS DEPS\n\n"
   # download and extract package
   aurutils_url="https://aur.archlinux.org/cgit/aur.git/snapshot/aurutils.tar.gz"
   curl $aurutils_url | tar xvz --directory /tmp/
