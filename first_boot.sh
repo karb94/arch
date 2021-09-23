@@ -39,12 +39,14 @@ main () {
   packages_url=https://raw.githubusercontent.com/karb94/arch/master/packages
   curl "$packages_url" | pacman -S --needed --noconfirm -
 
+  cat <<EOF >> /etc/doas.conf
+permit nopass root as nobody cmd makepkg
+EOF
+
   aurutils_url="https://aur.archlinux.org/cgit/aur.git/snapshot/aurutils.tar.gz"
   curl $aurutils_url | tar xvz --directory /tmp/
+  chmod -R 007 /tmp/aurutils
 
-  cat <<EOF >> /etc/pacman.conf
-permit nopass root cmd
-EOF
   # cat <<EOF >> /etc/pacman.conf
 
   # [aur]
