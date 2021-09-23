@@ -38,7 +38,7 @@ main () {
   packages_url=https://raw.githubusercontent.com/karb94/arch/master/packages
   curl "$packages_url" | pacman -S --needed --noconfirm -
 
-  mkdir -pv hook
+  mkdir -pv /etc/pacman.d/hooks
   # add pacman hooks to remove excess cache
   tee /etc/pacman.d/hooks/remove_old_cache.hook <<EOF
 [Trigger]
@@ -51,10 +51,9 @@ Target = *
 Description = Only keep cache from previous and current version
 When = PostTransaction
 Exec = /usr/bin/paccache -rvk2
-permit nopass root as nobody cmd makepkg
 EOF
 
-  tee /etc/pacman.d/hooks/remove_old_cache.hook <<EOF
+  tee /etc/pacman.d/hooks/remove_uninstalled_cache.hook <<EOF
 [Trigger]
 Operation = Remove
 Type = Package
@@ -64,7 +63,6 @@ Target = *
 Description = Remove cache of uninstalled packages
 When = PostTransaction
 Exec = /usr/bin/paccache -rvuk0
-permit nopass root as nobody cmd makepkg
 EOF
 
   tee /etc/doas.conf <<EOF
