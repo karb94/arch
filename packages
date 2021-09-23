@@ -10,3 +10,4 @@ jq
 curl
 bash-completion
 make
+pacman-contrib

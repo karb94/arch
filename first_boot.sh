@@ -30,25 +30,69 @@ main () {
   # # enable network interface
   # ip link set "$net_interfaces" up
 
-  # update system
-  pacman -Syu
 
-  # install aurutils dependencies
-  pacman -S --asdeps --needed --noconfirm fakeroot binutils signify pacutils
+  # update system
+  pacman -Syu --noconfirm
+
   # install packages
   packages_url=https://raw.githubusercontent.com/karb94/arch/master/packages
   curl "$packages_url" | pacman -S --needed --noconfirm -
 
-  cat <<EOF >> /etc/doas.conf
+  cat <<EOF > /etc/pacman.d/hooks/remove_old_cache.hook
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Package
+Target = *
+
+[Action]
+Description = Only keep cache from previous and current version
+When = PostTransaction
+Exec = /usr/bin/paccache -rvk2
 permit nopass root as nobody cmd makepkg
 EOF
 
+  cat <<EOF > /etc/pacman.d/hooks/remove_old_cache.hook
+[Trigger]
+Operation = Remove
+Type = Package
+Target = *
+
+[Action]
+Description = Remove cache of uninstalled packages
+When = PostTransaction
+Exec = /usr/bin/paccache -rvuk0
+permit nopass root as nobody cmd makepkg
+EOF
+
+  cat <<EOF > /etc/doas.conf
+permit nopass root as nobody cmd makepkg
+EOF
+
+  # AURUTILS INSTALLATION
+  # install aurutils dependencies
+  pacman -S --asdeps --needed --noconfirm fakeroot binutils signify pacutils
+  # download and extract package
   aurutils_url="https://aur.archlinux.org/cgit/aur.git/snapshot/aurutils.tar.gz"
   curl $aurutils_url | tar xvz --directory /tmp/
-  chmod -R 007 /tmp/aurutils
+  # make "nobody" user the owner of the folder
+  chown -R nobody /tmp/aurutils
+  # build aurutils
   cd /tmp/aurutils
   doas -u nobody makepkg
-  pacman -U --noconfirm
+  # install aurutils
+  pacman -U --noconfirm aurutils*.pkg.tar.zst
+  # clean up
+  cd /root
+  rm -r /tmp/aurutils
+  pacman -Rsn --noconfirm $(pacman -Qqtd)
+  pacman -Sc --noconfirm
+
+  cat <<EOF > /etc/doas.conf
+permit :wheel as root
+permit nopass :wheel as root cmd pacman args -Syu
+permit nopass :wheel as root cmd pacman args -S
+EOF
 
   # cat <<EOF >> /etc/pacman.conf
 
