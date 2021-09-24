@@ -142,7 +142,7 @@ EOF
 
   # set root password
   printf "\n\nSet root password\n"
-  arch-chroot /mnt "passwd while [ $? -ne 0 ]; do !!; done"
+  arch-chroot /mnt 'passwd; while [ $? -ne 0 ]; do passwd!!; done'
   arch-chroot /mnt useradd --create-home --groups wheel --shell /bin/bash $USERNAME
   printf "\n\nSet "$USERNAME" password\n"
   arch-chroot /mnt "passwd $USERNAME while [ $? -ne 0 ]; do !!; done"
@@ -159,5 +159,5 @@ elapsed=$(($(date +%s)-$start))
 set +e
 mv $log /mnt/root/$log
 
-# mount -R /mnt
+# umount -R /mnt
 # reboot
