@@ -159,5 +159,5 @@ elapsed=$(($(date +%s)-$start))
 set +e
 mv $log /mnt/root/$log
 
-mount -R /mnt
-reboot
+# mount -R /mnt
+# reboot
