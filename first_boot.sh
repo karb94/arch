@@ -66,7 +66,10 @@ Exec = /usr/bin/paccache -rvuk0
 EOF
 
   tee /etc/doas.conf <<EOF
-permit nopass root as nobody cmd makepkg
+permit nopass as root
+permit :wheel as root
+permit nopass :wheel cmd pacman args -S
+permit nopass :wheel cmd pacman args -Syu
 EOF
 
   # AURUTILS INSTALLATION
@@ -76,12 +79,10 @@ EOF
   printf "\n\nAFTER AURUTILS DEPS\n\n"
   # download and extract package
   aurutils_url="https://aur.archlinux.org/cgit/aur.git/snapshot/aurutils.tar.gz"
-  curl $aurutils_url | tar xvz --directory /tmp/
-  # make "nobody" user the owner of the folder
-  chown -R nobody /tmp/aurutils
+  curl $aurutils_url | doas -u carles tar xvz --directory /tmp/
   # build aurutils
   cd /tmp/aurutils
-  doas -u nobody makepkg
+  doas -u carles makepkg
   # install aurutils
   pacman -U --noconfirm aurutils*.pkg.tar.zst
   # clean up
@@ -90,11 +91,8 @@ EOF
   pacman -Rsn --noconfirm $(pacman -Qqtd)
   pacman -Sc --noconfirm
 
-  tee /etc/doas.conf <<EOF
-permit :wheel as root
-permit nopass :wheel as root cmd pacman args -Syu
-permit nopass :wheel as root cmd pacman args -S
-EOF
+  mkdir -p /var/cache/pacman/aur_pkg
+  doas -u repo-add /var/cache/pacman/aur_pkg/aur.db.tar.gz
 
   cat <<EOF >> /etc/pacman.conf
 [aur]
@@ -107,9 +105,8 @@ CacheDir = /var/cache/pacman/pkg\
 CacheDir = /var/cache/pacman/aur_pkg\
 CleanMethod = KeepCurrent' /etc/pacman.conf
 
-clean up
-systemctl disable first-boot.service
-rm /etc/systemd/system/first-boot.service"
+# clean up
+# rm /etc/NetworkManager/dispatcher.d/10-first_boot.sh
 }
 
-main >> /root/dispatcher.log
+main >> /root/dispatcher.log 2>>&1

@@ -14,6 +14,7 @@ EFI_SIZE=300MiB
 BOOT_SIZE=300MiB
 
 HOSTNAME=Arch_VV
+USERNAME=carles
 
 # exit when any command fails
 set -e
@@ -141,7 +142,10 @@ EOF
 
   # set root password
   printf "\n\nSet root password\n"
-  arch-chroot /mnt passwd
+  arch-chroot /mnt "passwd while [ $? -ne 0 ]; do !!; done"
+  arch-chroot /mnt useradd --create-home --groups wheel --shell /bin/bash $USERNAME
+  printf "\n\nSet "$USERNAME" password\n"
+  arch-chroot /mnt "passwd $USERNAME while [ $? -ne 0 ]; do !!; done"
 
   first_boot_url=https://raw.githubusercontent.com/karb94/arch/master/first_boot.sh
   curl "$first_boot_url" > /mnt/etc/NetworkManager/dispatcher.d/10-first_boot.sh
@@ -153,7 +157,7 @@ start=$(date +%s)
 arch_install 2>&1 | tee -a $log
 elapsed=$(($(date +%s)-$start))
 set +e
-mv $log /mnt/$log
+mv $log /mnt/root/$log
 
 mount -R /mnt
 reboot
